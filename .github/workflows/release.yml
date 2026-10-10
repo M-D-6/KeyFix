@@ -1,0 +1,133 @@
+name: Build & Release
+
+# Builds KeyFix for x86, x64 and ARM64, wraps each build in its own
+# Inno Setup installer, and attaches the three installers to a GitHub Release.
+#
+# Release: push a tag like v1.0.2 (must be vMAJOR.MINOR.PATCH).
+#   git tag v1.0.2 && git push origin v1.0.2
+# Manual run (Actions tab -> Run workflow): builds the installers and
+# keeps them as workflow artifacts, without publishing a release.
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build ${{ matrix.arch }}
+    runs-on: windows-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x86
+            platform: x86
+            iscc_define: /DKEYFIX_X86
+          - arch: x64
+            platform: x64
+            iscc_define: ''
+          - arch: arm64
+            platform: ARM64
+            iscc_define: /DKEYFIX_ARM64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Resolve version
+        id: ver
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_REF -like 'refs/tags/v*') {
+            $v = $env:GITHUB_REF_NAME.TrimStart('v')
+            "version=$v" >> $env:GITHUB_OUTPUT
+          } else {
+            "version=" >> $env:GITHUB_OUTPUT
+          }
+
+      - name: Publish app (${{ matrix.arch }})
+        shell: pwsh
+        run: |
+          $dotnetArgs = @('publish', 'KeyFix/KeyFix.csproj', '-c', 'Release', "-p:Platform=${{ matrix.platform }}")
+          $v = '${{ steps.ver.outputs.version }}'
+          if ($v) {
+            $dotnetArgs += "-p:AssemblyVersion=$v.0"
+            $dotnetArgs += "-p:FileVersion=$v.0"
+            $dotnetArgs += "-p:InformationalVersion=$v"
+          }
+          dotnet @dotnetArgs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (-not (Test-Path 'KeyFix/publish/win-${{ matrix.arch }}/KeyFix.exe')) {
+            Write-Error 'KeyFix.exe not found in publish folder'
+            exit 1
+          }
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          choco install innosetup -y --no-progress
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Build installer (${{ matrix.arch }})
+        shell: pwsh
+        env:
+          KEYFIX_VERSION: ${{ steps.ver.outputs.version }}
+        run: |
+          $iscc = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $iscc)) { $iscc = "$env:ProgramFiles\Inno Setup 6\ISCC.exe" }
+          $define = '${{ matrix.iscc_define }}'
+          Push-Location KeyFix.Installer
+          if ($define) { & $iscc $define KeyFix.iss } else { & $iscc KeyFix.iss }
+          $code = $LASTEXITCODE
+          Pop-Location
+          if ($code -ne 0) { exit $code }
+          if (-not (Test-Path 'KeyFix.Installer/Output/KeyFix-Setup-${{ matrix.arch }}.exe')) {
+            Write-Error 'Installer was not produced'
+            exit 1
+          }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KeyFix-Setup-${{ matrix.arch }}
+          path: KeyFix.Installer/Output/KeyFix-Setup-${{ matrix.arch }}.exe
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Checksums
+        run: |
+          cd dist
+          sha256sum KeyFix-Setup-*.exe > SHA256SUMS.txt
+          cat SHA256SUMS.txt
+
+      - name: Create / update release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$TAG" dist/* --title "KeyFix $TAG" --generate-notes --repo "$GITHUB_REPOSITORY"
+          fi

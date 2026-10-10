@@ -1,0 +1,264 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+
+		<OutputType>WinExe</OutputType>
+
+		<TargetFramework>net10.0-windows10.0.17763.0</TargetFramework>
+		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+
+		<RootNamespace>KeyFix</RootNamespace>
+
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+
+		<Platforms>x86;x64;ARM64</Platforms>
+		<RuntimeIdentifiers>win-x86;win-x64;win-arm64</RuntimeIdentifiers>
+
+		<!-- Runtime identifier follows the selected platform (x64 when none is set). -->
+		<KeyFixRid>win-x64</KeyFixRid>
+		<KeyFixRid Condition="'$(Platform)' == 'x86'">win-x86</KeyFixRid>
+		<KeyFixRid Condition="'$(Platform)' == 'ARM64'">win-arm64</KeyFixRid>
+		<RuntimeIdentifier>$(KeyFixRid)</RuntimeIdentifier>
+
+		<UseWinUI>true</UseWinUI>
+		<WinUISDKReferences>false</WinUISDKReferences>
+
+		<WindowsPackageType>None</WindowsPackageType>
+
+		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+
+		<SelfContained>true</SelfContained>
+
+		<EnableMsixTooling>true</EnableMsixTooling>
+
+		<Nullable>enable</Nullable>
+
+		<ApplicationIcon>KeyFix.ico</ApplicationIcon>
+
+		<ApplicationTitle>KeyFix</ApplicationTitle>
+		<Company>M-D-6</Company>
+		<Product>KeyFix</Product>
+		<Authors>M-D-6</Authors>
+		<Description>Keyboard layout text conversion utility.</Description>
+		<Copyright>Copyright © 2026 M-D-6</Copyright>
+		<AssemblyVersion>1.0.0.0</AssemblyVersion>
+		<FileVersion>1.0.0.0</FileVersion>
+		<InformationalVersion>1.0.0</InformationalVersion>
+		<RepositoryUrl>https://github.com/M-D-6/KeyFix</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+
+		<SatelliteResourceLanguages>en-US;fa-IR</SatelliteResourceLanguages>
+		<ResourceLanguages>en-US;fa-IR</ResourceLanguages>
+
+	</PropertyGroup>
+
+	<ItemGroup>
+
+		<Content Include="KeyFix.ico">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+
+	</ItemGroup>
+
+	<ItemGroup>
+
+		<Manifest Include="$(ApplicationManifest)" />
+
+	</ItemGroup>
+
+	<ItemGroup>
+
+		<PackageReference
+			Include="Microsoft.Windows.SDK.BuildTools"
+			Version="10.0.28000.2526" />
+
+		<PackageReference
+			Include="Microsoft.WindowsAppSDK"
+			Version="2.4.0" />
+
+		<PackageReference
+			Include="H.NotifyIcon.WinUI"
+			Version="2.4.1" />
+
+		<PackageReference
+			Update="Microsoft.WindowsAppSDK.AI"
+			ExcludeAssets="all" />
+
+		<PackageReference
+			Update="Microsoft.WindowsAppSDK.ML"
+			ExcludeAssets="all" />
+
+	</ItemGroup>
+
+	<PropertyGroup>
+
+		<RuntimeIdentifier>$(KeyFixRid)</RuntimeIdentifier>
+
+		<SelfContained>true</SelfContained>
+
+		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+
+		<DebugType>None</DebugType>
+
+		<DebugSymbols>false</DebugSymbols>
+
+		<PublishReadyToRun>false</PublishReadyToRun>
+
+		<PublishReadyToRunShowWarnings>false</PublishReadyToRunShowWarnings>
+
+		<PublishTrimmed>false</PublishTrimmed>
+
+		<PublishSingleFile>false</PublishSingleFile>
+
+		<SatelliteResourceLanguages>
+			en-US;fa-IR
+		</SatelliteResourceLanguages>
+
+		<ResourceLanguages>
+			en-US;fa-IR
+		</ResourceLanguages>
+
+		<PublishDir>$(MSBuildProjectDirectory)\publish\$(KeyFixRid)\</PublishDir>
+
+	</PropertyGroup>
+
+	<Target Name="CleanupPublishLanguages" AfterTargets="Publish">
+
+		<ItemGroup>
+
+			<ExtraLanguageDirectories Include="$(PublishDir)\af-ZA" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\am-ET" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\ar-SA" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\as-IN" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\az-Latn-AZ" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\bg-BG" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\bn-IN" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\bs-Latn-BA" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\ca-ES" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\ca-Es-VALENCIA" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\cs-CZ" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\cy-GB" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\da-DK" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\de-DE" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\el-GR" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\en-GB" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\es-ES" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\es-MX" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\et-EE" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\eu-ES" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\fi-FI" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\fil-PH" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\fr-CA" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\fr-FR" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\ga-IE" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\gd-gb" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\gl-ES" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\gu-IN" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\he-IL" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\hi-IN" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\hr-HR" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\hu-HU" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\hy-AM" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\id-ID" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\is-IS" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\it-IT" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\ja-JP" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\ka-GE" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\kk-KZ" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\km-KH" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\kn-IN" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\ko-KR" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\kok-IN" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\lb-LU" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\lo-LA" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\lt-LT" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\lv-LV" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\mi-NZ" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\mk-MK" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\ml-IN" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\mr-IN" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\ms-MY" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\mt-MT" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\nb-NO" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\ne-NP" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\nl-NL" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\nn-NO" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\or-IN" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\pa-IN" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\pl-PL" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\pt-BR" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\pt-PT" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\quz-PE" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\ro-RO" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\ru-RU" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\sk-SK" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\sl-SI" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\sq-AL" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\sr-Cyrl-BA" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\sr-Cyrl-RS" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\sr-Latn-RS" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\sv-SE" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\ta-IN" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\te-IN" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\th-TH" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\tr-TR" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\tt-RU" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\ug-CN" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\uk-UA" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\ur-PK" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\uz-Latn-UZ" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\vi-VN" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\zh-CN" />
+			<ExtraLanguageDirectories Include="$(PublishDir)\zh-TW" />
+
+		</ItemGroup>
+
+		<RemoveDir Directories="@(ExtraLanguageDirectories)" />
+
+	</Target>
+
+	<Target Name="RemoveUnusedWindowsMLBinaries"
+        AfterTargets="CleanupPublishLanguages">
+
+		<ItemGroup>
+
+			<UnusedFiles Include="$(PublishDir)\onnxruntime.dll"
+						Condition="Exists('$(PublishDir)\onnxruntime.dll')" />
+
+			<UnusedFiles Include="$(PublishDir)\Microsoft.ML.OnnxRuntime.dll"
+						Condition="Exists('$(PublishDir)\Microsoft.ML.OnnxRuntime.dll')" />
+
+			<UnusedFiles Include="$(PublishDir)\runtimes\$(KeyFixRid)\native\onnxruntime.dll"
+						Condition="Exists('$(PublishDir)\runtimes\$(KeyFixRid)\native\onnxruntime.dll')" />
+
+			<UnusedFiles Include="$(PublishDir)\DirectML.dll"
+						Condition="Exists('$(PublishDir)\DirectML.dll')" />
+
+			<UnusedFiles Include="$(PublishDir)\runtimes\$(KeyFixRid)\native\DirectML.dll"
+						Condition="Exists('$(PublishDir)\runtimes\$(KeyFixRid)\native\DirectML.dll')" />
+
+			<UnusedFiles Include="$(PublishDir)\Microsoft.Windows.AI.*.dll"
+						Condition="Exists('$(PublishDir)\Microsoft.Windows.AI.*.dll')" />
+
+			<UnusedFiles Include="$(PublishDir)\NPUDetect.dll"
+						Condition="Exists('$(PublishDir)\NPUDetect.dll')" />
+
+			<UnusedFiles Include="$(PublishDir)\PerceptiveStreaming.dll"
+						Condition="Exists('$(PublishDir)\PerceptiveStreaming.dll')" />
+
+			<UnusedFiles Include="$(PublishDir)\RestartAgent.exe"
+						Condition="Exists('$(PublishDir)\RestartAgent.exe')" />
+
+			<UnusedFiles Include="$(PublishDir)\SessionHandleIPCProxyStub.dll"
+						Condition="Exists('$(PublishDir)\SessionHandleIPCProxyStub.dll')" />
+
+			<UnusedFiles Include="$(PublishDir)\workloads*.json"
+						Condition="Exists('$(PublishDir)\workloads*.json')" />
+
+		</ItemGroup>
+
+		<Delete Files="@(UnusedFiles)" />
+
+	</Target>
+
+</Project>

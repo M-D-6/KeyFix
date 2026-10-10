@@ -1,0 +1,1027 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Window
+    x:Class="KeyFix.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:tb="using:H.NotifyIcon"
+    Title="KeyFix">
+
+    <Window.SystemBackdrop>
+        <MicaBackdrop Kind="Base"/>
+    </Window.SystemBackdrop>
+
+    <Grid
+        x:Name="RootGrid"
+        FlowDirection="LeftToRight">
+
+        <Grid.Resources>
+
+            <XamlUICommand
+                x:Key="TraySettingsCommand"
+                Label="تنظیمات"
+                Description="باز کردن تنظیمات KeyFix"
+                ExecuteRequested="TraySettingsCommand_ExecuteRequested"/>
+
+            <XamlUICommand
+                x:Key="TrayExitCommand"
+                Label="خروج"
+                Description="خروج کامل از KeyFix"
+                ExecuteRequested="TrayExitCommand_ExecuteRequested"/>
+
+            <XamlUICommand
+                x:Key="TrayEnableCommand"
+                Label="فعال"
+                Description="فعال یا غیرفعال کردن KeyFix"
+                ExecuteRequested="TrayEnableCommand_ExecuteRequested"/>
+
+            <XamlUICommand
+                x:Key="TrayShowWindowCommand"
+                Label="نمایش KeyFix"
+                Description="باز کردن پنجره KeyFix"
+                ExecuteRequested="TrayShowWindowCommand_ExecuteRequested"/>
+
+        </Grid.Resources>
+
+        <Grid
+            x:Name="AppTitleBar"
+            Height="32"
+            Padding="10,0,150,0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Top"
+            Background="Transparent"
+            FlowDirection="LeftToRight"
+            Canvas.ZIndex="1000">
+
+            <StackPanel
+                Orientation="Horizontal"
+                Spacing="8"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                FlowDirection="LeftToRight"
+                IsHitTestVisible="False">
+
+                <Image
+                    Source="KeyFix.ico"
+                    Width="16"
+                    Height="16"
+                    Stretch="Uniform"
+                    VerticalAlignment="Center"/>
+
+                <TextBlock
+                    Text="KeyFix"
+                    FontSize="13"
+                    FontWeight="SemiBold"
+                    VerticalAlignment="Center"/>
+
+            </StackPanel>
+
+        </Grid>
+
+        <ScrollViewer
+            Margin="0,32,0,0"
+            HorizontalScrollBarVisibility="Disabled"
+            VerticalScrollBarVisibility="Auto">
+
+            <Grid
+                Width="760"
+                MinWidth="760"
+                MaxWidth="760"
+                HorizontalAlignment="Center"
+                Padding="28,24,28,32"
+                FlowDirection="LeftToRight">
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="16"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="16"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="0"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="16"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="16"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="16"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="16"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Border
+                    Grid.Row="0"
+                    Padding="24"
+                    CornerRadius="18"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1">
+
+                    <Grid
+                        x:Name="HeaderGrid"
+                        FlowDirection="LeftToRight">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel
+                            x:Name="AppTitlePanel"
+                            Grid.Column="0"
+                            Spacing="4"
+                            Margin="0,0,22,0"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
+                            FlowDirection="LeftToRight">
+
+                            <TextBlock
+                                x:Name="AppTitleText"
+                                FontSize="20"
+                                FontWeight="SemiBold"
+                                HorizontalAlignment="Stretch"
+                                TextWrapping="NoWrap"/>
+
+                            <TextBlock
+                                x:Name="AppDescriptionText"
+                                FontSize="14"
+                                Opacity="0.68"
+                                HorizontalAlignment="Stretch"
+                                TextWrapping="NoWrap"/>
+
+                        </StackPanel>
+
+                        <StackPanel
+                            x:Name="LanguagePanel"
+                            Grid.Column="1"
+                            Width="200"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Center"
+                            Spacing="3"
+                            FlowDirection="LeftToRight">
+
+                            <TextBlock
+                                x:Name="LanguageLabelText"
+                                Width="200"
+                                FontSize="13"
+                                Opacity="0.68"
+                                HorizontalAlignment="Stretch"
+                                TextWrapping="NoWrap"/>
+
+                            <ComboBox
+                                x:Name="LanguageComboBox"
+                                Width="200"
+                                MinHeight="40"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Stretch"
+                                FlowDirection="LeftToRight"
+                                SelectionChanged="LanguageComboBox_SelectionChanged">
+
+                                <ComboBoxItem
+                                    Content="فارسی"
+                                    FlowDirection="RightToLeft"
+                                    HorizontalContentAlignment="Right"/>
+
+                                <ComboBoxItem
+                                    Content="English"
+                                    FlowDirection="LeftToRight"
+                                    HorizontalContentAlignment="Left"/>
+
+                            </ComboBox>
+
+                        </StackPanel>
+
+                    </Grid>
+
+                </Border>
+
+                <Border
+                    x:Name="EnabledStateCard"
+                    Grid.Row="2"
+                    HorizontalAlignment="Stretch"
+                    Padding="0"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="16">
+
+                    <Grid
+                        Padding="20"
+                        FlowDirection="LeftToRight">
+
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Ellipse
+                            x:Name="EnabledStateIndicator"
+                            Grid.Column="0"
+                            Width="11"
+                            Height="11"
+                            Margin="0,0,14,0"
+                            VerticalAlignment="Center"/>
+
+                        <StackPanel
+                            x:Name="EnabledStateTextPanel"
+                            Grid.Column="1"
+                            Spacing="4"
+                            FlowDirection="LeftToRight">
+
+                            <TextBlock
+                                x:Name="EnabledStateText"
+                                FontSize="18"
+                                FontWeight="SemiBold"
+                                HorizontalAlignment="Stretch"
+                                TextWrapping="Wrap"/>
+
+                            <TextBlock
+                                x:Name="EnabledStateDescriptionText"
+                                FontSize="13"
+                                Opacity="0.68"
+                                HorizontalAlignment="Stretch"
+                                TextWrapping="Wrap"/>
+
+                        </StackPanel>
+
+                        <ToggleSwitch
+                            x:Name="EnabledStateToggle"
+                            Grid.Column="2"
+                            VerticalAlignment="Center"
+                            HorizontalAlignment="Right"
+                            OnContent=""
+                            OffContent=""
+                            Toggled="EnabledStateToggle_Toggled"/>
+
+                    </Grid>
+
+                </Border>
+
+                <Border
+                    Grid.Row="4"
+                    Padding="20"
+                    CornerRadius="16"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1">
+
+                    <StackPanel
+                        Spacing="15"
+                        FlowDirection="LeftToRight">
+
+                        <StackPanel
+                            Spacing="4"
+                            FlowDirection="LeftToRight">
+
+                            <TextBlock
+                                x:Name="ShortcutSectionText"
+                                FontSize="19"
+                                FontWeight="SemiBold"
+                                HorizontalAlignment="Stretch"
+                                TextWrapping="Wrap"/>
+
+                            <TextBlock
+                                x:Name="ShortcutDescriptionText"
+                                FontSize="13"
+                                Opacity="0.68"
+                                HorizontalAlignment="Stretch"
+                                TextWrapping="Wrap"/>
+
+                        </StackPanel>
+
+                        <Border
+                            Padding="15,12"
+                            CornerRadius="11"
+                            Background="{ThemeResource ControlFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="1">
+
+                            <TextBlock
+                                x:Name="CurrentShortcutText"
+                                FontSize="18"
+                                FontWeight="SemiBold"
+                                FlowDirection="LeftToRight"
+                                HorizontalAlignment="Center"/>
+
+                        </Border>
+
+                        <Button
+                            x:Name="ChangeShortcutButton"
+                            Click="ChangeShortcutButton_Click"
+                            HorizontalAlignment="Left"
+                            Padding="18,9"/>
+
+                    </StackPanel>
+
+                </Border>
+
+                <Border
+                    x:Name="ShortcutEditorPanel"
+                    Grid.Row="6"
+                    Margin="0,16,0,0"
+                    Width="600"
+                    MinWidth="600"
+                    MaxWidth="600"
+                    HorizontalAlignment="Center"
+                    Padding="22"
+                    CornerRadius="16"
+                    Visibility="Collapsed"
+                    Background="{ThemeResource LayerFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1">
+
+                    <Grid
+                        HorizontalAlignment="Stretch">
+
+                        <StackPanel
+                            HorizontalAlignment="Stretch"
+                            Spacing="13"
+                            FlowDirection="LeftToRight">
+
+                            <TextBlock
+                                x:Name="ShortcutEditorTitleText"
+                                HorizontalAlignment="Stretch"
+                                FontSize="18"
+                                FontWeight="SemiBold"
+                                TextWrapping="NoWrap"/>
+
+                            <Button
+                                x:Name="ShortcutRecorderButton"
+                                HorizontalAlignment="Stretch"
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                MinHeight="58"
+                                Padding="16,12"
+                                Click="ShortcutRecorderButton_Click"
+                                PreviewKeyDown="ShortcutRecorderButton_PreviewKeyDown"
+                                KeyDown="ShortcutRecorderButton_KeyDown"
+                                KeyUp="ShortcutRecorderButton_KeyUp"
+                                IsTabStop="True">
+
+                                <TextBlock
+                                    x:Name="ShortcutRecorderText"
+                                    FontSize="18"
+                                    FontWeight="SemiBold"
+                                    TextAlignment="Center"
+                                    HorizontalAlignment="Center"
+                                    TextWrapping="NoWrap"
+                                    FlowDirection="LeftToRight"/>
+
+                            </Button>
+
+                            <TextBlock
+                                x:Name="ShortcutHelpText"
+                                HorizontalAlignment="Stretch"
+                                FontSize="13"
+                                TextWrapping="Wrap"
+                                Opacity="0.72"
+                                FlowDirection="LeftToRight"
+                                TextAlignment="Left"/>
+
+                            <Grid
+                                x:Name="ShortcutEditorButtonsGrid"
+                                HorizontalAlignment="Stretch">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+
+                                <Button
+                                    x:Name="RetryShortcutButton"
+                                    Grid.Column="0"
+                                    Click="RetryShortcutButton_Click"
+                                    HorizontalAlignment="Left"
+                                    Padding="18,9"
+                                    Visibility="Collapsed"/>
+
+                                <StackPanel
+                                    x:Name="ShortcutEditorButtonsPanel"
+                                    Grid.Column="1"
+                                    HorizontalAlignment="Right"
+                                    VerticalAlignment="Center"
+                                    Orientation="Horizontal"
+                                    Spacing="9"
+                                    FlowDirection="LeftToRight">
+
+                                    <Button
+                                        x:Name="SaveShortcutButton"
+                                        Click="SaveShortcutButton_Click"
+                                        Padding="18,9"/>
+
+                                    <Button
+                                        x:Name="CancelShortcutButton"
+                                        Click="CancelShortcutButton_Click"
+                                        Padding="18,9"/>
+
+                                </StackPanel>
+
+                            </Grid>
+
+                        </StackPanel>
+
+                    </Grid>
+
+                </Border>
+
+                <Border
+                    Grid.Row="8"
+                    Padding="0"
+                    CornerRadius="16"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1">
+
+                    <StackPanel
+                        Spacing="0"
+                        FlowDirection="LeftToRight">
+
+                        <Border
+                            Padding="20,18,20,14"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="0,0,0,1">
+
+                            <StackPanel Spacing="3" FlowDirection="LeftToRight">
+                                <TextBlock
+                                    x:Name="ExecutionOptionsTitleText"
+                                    FontSize="22"
+                                    FontWeight="SemiBold"
+                                    TextWrapping="Wrap"/>
+                            </StackPanel>
+
+                        </Border>
+
+                        <Border
+                            Padding="20,18"
+                            HorizontalAlignment="Stretch"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="0,0,0,1">
+
+                            <Grid
+                                x:Name="StartupOptionGrid"
+                                HorizontalAlignment="Stretch"
+                                FlowDirection="LeftToRight">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <ToggleSwitch
+                                    x:Name="StartWithWindowsOption"
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    OnContent=""
+                                    OffContent=""
+                                    FlowDirection="LeftToRight"/>
+
+                                <StackPanel
+                                    x:Name="StartupText"
+                                    Grid.Column="1"
+                                    Margin="16,0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Stretch"
+                                    Spacing="3"
+                                    FlowDirection="LeftToRight">
+
+                                    <TextBlock
+                                        x:Name="StartupTitleText"
+                                        FontSize="16"
+                                        FontWeight="SemiBold"
+                                        TextWrapping="Wrap"/>
+
+                                    <TextBlock
+                                        x:Name="StartupDescriptionText"
+                                        FontSize="13"
+                                        Opacity="0.68"
+                                        TextWrapping="Wrap"/>
+
+                                </StackPanel>
+
+                            </Grid>
+
+                        </Border>
+
+                        <Border
+                            Padding="20,18"
+                            HorizontalAlignment="Stretch"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="0,0,0,1">
+
+                            <Grid
+                                x:Name="KeepRunningInBackgroundOptionGrid"
+                                HorizontalAlignment="Stretch"
+                                FlowDirection="LeftToRight">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <ToggleSwitch
+                                    x:Name="KeepRunningInBackgroundOption"
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    OnContent=""
+                                    OffContent=""
+                                    FlowDirection="LeftToRight"/>
+
+                                <StackPanel
+                                    x:Name="KeepRunningInBackgroundText"
+                                    Grid.Column="1"
+                                    Margin="16,0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Stretch"
+                                    Spacing="3"
+                                    FlowDirection="LeftToRight">
+
+                                    <TextBlock
+                                        x:Name="KeepRunningInBackgroundTitleText"
+                                        FontSize="16"
+                                        FontWeight="SemiBold"
+                                        TextWrapping="Wrap"/>
+
+                                    <TextBlock
+                                        x:Name="KeepRunningInBackgroundDescriptionText"
+                                        FontSize="13"
+                                        Opacity="0.68"
+                                        TextWrapping="Wrap"/>
+
+                                </StackPanel>
+
+                            </Grid>
+
+                        </Border>
+
+                        <Border
+                            Padding="20,18"
+                            HorizontalAlignment="Stretch"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="0,0,0,1">
+
+                            <Grid
+                                x:Name="ShowTrayIconOptionGrid"
+                                HorizontalAlignment="Stretch"
+                                FlowDirection="LeftToRight">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <ToggleSwitch
+                                    x:Name="ShowTrayIconOption"
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    OnContent=""
+                                    OffContent=""
+                                    FlowDirection="LeftToRight"/>
+
+                                <StackPanel
+                                    x:Name="ShowTrayIconText"
+                                    Grid.Column="1"
+                                    Margin="16,0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Stretch"
+                                    Spacing="3"
+                                    FlowDirection="LeftToRight">
+
+                                    <TextBlock
+                                        x:Name="ShowTrayIconTitleText"
+                                        FontSize="16"
+                                        FontWeight="SemiBold"
+                                        TextWrapping="Wrap"/>
+
+                                    <TextBlock
+                                        x:Name="ShowTrayIconDescriptionText"
+                                        FontSize="13"
+                                        Opacity="0.68"
+                                        TextWrapping="Wrap"/>
+
+                                </StackPanel>
+
+                            </Grid>
+
+                        </Border>
+
+                        <Border
+                            Padding="20,18"
+                            HorizontalAlignment="Stretch"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="0,0,0,1">
+
+                            <Grid
+                                x:Name="StatusNotificationsOptionGrid"
+                                HorizontalAlignment="Stretch"
+                                FlowDirection="LeftToRight">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <ToggleSwitch
+                                    x:Name="StatusNotificationsOption"
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    OnContent=""
+                                    OffContent=""
+                                    FlowDirection="LeftToRight"/>
+
+                                <StackPanel
+                                    x:Name="StatusNotificationsText"
+                                    Grid.Column="1"
+                                    Margin="16,0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Stretch"
+                                    Spacing="3"
+                                    FlowDirection="LeftToRight">
+
+                                    <TextBlock
+                                        x:Name="StatusNotificationsTitleText"
+                                        FontSize="16"
+                                        FontWeight="SemiBold"
+                                        TextWrapping="Wrap"/>
+
+                                    <TextBlock
+                                        x:Name="StatusNotificationsDescriptionText"
+                                        FontSize="13"
+                                        Opacity="0.68"
+                                        TextWrapping="Wrap"/>
+
+                                </StackPanel>
+
+                            </Grid>
+
+                        </Border>
+
+                    </StackPanel>
+
+                </Border>
+
+                <Border
+                    Grid.Row="10"
+                    Padding="0"
+                    CornerRadius="16"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1">
+
+                    <StackPanel
+                        Spacing="0"
+                        FlowDirection="LeftToRight">
+
+                        <Border
+                            Padding="20,18,20,14"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="0,0,0,1">
+
+                            <StackPanel Spacing="3" FlowDirection="LeftToRight">
+                                <TextBlock
+                                    x:Name="ConversionOptionsTitleText"
+                                    FontSize="22"
+                                    FontWeight="SemiBold"
+                                    TextWrapping="Wrap"/>
+                            </StackPanel>
+
+                        </Border>
+
+                        <Border
+                            Padding="20,18"
+                            HorizontalAlignment="Stretch"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="0,0,0,1">
+
+                            <Grid
+                                x:Name="AutoSwitchKeyboardLanguageOptionGrid"
+                                HorizontalAlignment="Stretch"
+                                FlowDirection="LeftToRight">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <ToggleSwitch
+                                    x:Name="AutoSwitchKeyboardLanguageOption"
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    OnContent=""
+                                    OffContent=""
+                                    FlowDirection="LeftToRight"/>
+
+                                <StackPanel
+                                    x:Name="AutoSwitchKeyboardLanguageText"
+                                    Grid.Column="1"
+                                    Margin="16,0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Stretch"
+                                    Spacing="3"
+                                    FlowDirection="LeftToRight">
+
+                                    <TextBlock
+                                        x:Name="AutoSwitchKeyboardLanguageTitleText"
+                                        FontSize="16"
+                                        FontWeight="SemiBold"
+                                        TextWrapping="Wrap"/>
+
+                                    <TextBlock
+                                        x:Name="AutoSwitchKeyboardLanguageDescriptionText"
+                                        FontSize="13"
+                                        Opacity="0.68"
+                                        TextWrapping="Wrap"/>
+
+                                </StackPanel>
+
+                            </Grid>
+
+                        </Border>
+
+                        <Border
+                            Padding="20,18"
+                            HorizontalAlignment="Stretch"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="0,0,0,1">
+
+                            <Grid
+                                x:Name="DetectCapsLockOptionGrid"
+                                HorizontalAlignment="Stretch"
+                                FlowDirection="LeftToRight">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <ToggleSwitch
+                                    x:Name="DetectCapsLockOption"
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    OnContent=""
+                                    OffContent=""
+                                    FlowDirection="LeftToRight"/>
+
+                                <StackPanel
+                                    x:Name="DetectCapsLockText"
+                                    Grid.Column="1"
+                                    Margin="16,0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Stretch"
+                                    Spacing="3"
+                                    FlowDirection="LeftToRight">
+
+                                    <TextBlock
+                                        x:Name="DetectCapsLockTitleText"
+                                        FontSize="16"
+                                        FontWeight="SemiBold"
+                                        TextWrapping="Wrap"/>
+
+                                    <TextBlock
+                                        x:Name="DetectCapsLockDescriptionText"
+                                        FontSize="13"
+                                        Opacity="0.68"
+                                        TextWrapping="Wrap"/>
+
+                                </StackPanel>
+
+                            </Grid>
+
+                        </Border>
+
+                        <Border
+                            Padding="20,18"
+                            HorizontalAlignment="Stretch"
+                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                            BorderThickness="0,0,0,1">
+
+                            <Grid
+                                x:Name="PersianToEnglishOptionGrid"
+                                HorizontalAlignment="Stretch"
+                                FlowDirection="LeftToRight">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <ToggleSwitch
+                                    x:Name="IgnoreShiftPersianToEnglishOption"
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    OnContent=""
+                                    OffContent=""
+                                    FlowDirection="LeftToRight"/>
+
+                                <StackPanel
+                                    x:Name="PersianToEnglishText"
+                                    Grid.Column="1"
+                                    Margin="16,0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Stretch"
+                                    Spacing="3"
+                                    FlowDirection="LeftToRight">
+
+                                    <TextBlock
+                                        x:Name="PersianToEnglishTitleText"
+                                        FontSize="16"
+                                        FontWeight="SemiBold"
+                                        TextWrapping="Wrap"/>
+
+                                    <TextBlock
+                                        x:Name="PersianToEnglishDescriptionText"
+                                        FontSize="13"
+                                        Opacity="0.68"
+                                        TextWrapping="Wrap"/>
+
+                                </StackPanel>
+
+                            </Grid>
+
+                        </Border>
+
+                        <Border
+                            Padding="20,18"
+                            HorizontalAlignment="Stretch"
+                            BorderThickness="0">
+
+                            <Grid
+                                x:Name="EnglishToPersianOptionGrid"
+                                HorizontalAlignment="Stretch"
+                                FlowDirection="LeftToRight">
+
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <ToggleSwitch
+                                    x:Name="IgnoreShiftEnglishToPersianOption"
+                                    Grid.Column="0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Left"
+                                    OnContent=""
+                                    OffContent=""
+                                    FlowDirection="LeftToRight"/>
+
+                                <StackPanel
+                                    x:Name="EnglishToPersianText"
+                                    Grid.Column="1"
+                                    Margin="16,0"
+                                    VerticalAlignment="Center"
+                                    HorizontalAlignment="Stretch"
+                                    Spacing="3"
+                                    FlowDirection="LeftToRight">
+
+                                    <TextBlock
+                                        x:Name="EnglishToPersianTitleText"
+                                        FontSize="16"
+                                        FontWeight="SemiBold"
+                                        TextWrapping="Wrap"/>
+
+                                    <TextBlock
+                                        x:Name="EnglishToPersianDescriptionText"
+                                        FontSize="13"
+                                        Opacity="0.68"
+                                        TextWrapping="Wrap"/>
+
+                                </StackPanel>
+
+                            </Grid>
+
+                        </Border>
+
+                    </StackPanel>
+
+                </Border>
+
+                <Border
+                    Grid.Row="12"
+                    Padding="18"
+                    CornerRadius="14"
+                    Background="{ThemeResource ControlFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1">
+
+                    <StackPanel
+                        Spacing="7"
+                        FlowDirection="LeftToRight">
+
+                        <TextBlock
+                            x:Name="StatusTitleText"
+                            FontSize="14"
+                            FontWeight="SemiBold"
+                            HorizontalAlignment="Stretch"
+                            TextWrapping="NoWrap"/>
+
+                        <TextBlock
+                            x:Name="OutputTextBox"
+                            FontSize="13"
+                            MinHeight="40"
+                            TextWrapping="Wrap"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Center"
+                            Opacity="0.82"
+                            IsTextSelectionEnabled="False"/>
+
+                    </StackPanel>
+
+                </Border>
+
+                <Border
+                    Grid.Row="14"
+                    Padding="18"
+                    CornerRadius="14"
+                    Background="{ThemeResource ControlFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1">
+
+                    <StackPanel
+                        Spacing="7"
+                        HorizontalAlignment="Stretch">
+
+                        <TextBlock
+                            x:Name="AboutTitleText"
+                            FontSize="16"
+                            FontWeight="SemiBold"
+                            HorizontalAlignment="Stretch"
+                            TextWrapping="NoWrap"/>
+
+                        <TextBlock
+                            x:Name="AboutDescriptionText"
+                            FontSize="13"
+                            Opacity="0.68"
+                            HorizontalAlignment="Stretch"
+                            TextWrapping="Wrap"/>
+
+                    </StackPanel>
+
+                </Border>
+
+            </Grid>
+
+        </ScrollViewer>
+
+        <tb:TaskbarIcon
+            x:Name="TrayIcon"
+            ToolTipText="KeyFix"
+            IconSource="KeyFix.ico"
+            Visibility="Visible"
+            NoLeftClickDelay="True"
+            MenuActivation="RightClick"
+            ContextMenuMode="PopupMenu"
+            LeftClickCommand="{StaticResource TrayShowWindowCommand}">
+
+            <tb:TaskbarIcon.ContextFlyout>
+
+                <MenuFlyout
+                    x:Name="TrayMenuFlyout"
+                    AreOpenCloseAnimationsEnabled="False">
+
+                    <ToggleMenuFlyoutItem
+                        x:Name="TrayEnabledItem"
+                        Text="فعال"
+                        Width="140"
+                        IsChecked="True"
+                        Command="{StaticResource TrayEnableCommand}"/>
+
+                    <MenuFlyoutSeparator/>
+
+                    <MenuFlyoutItem
+                        x:Name="TraySettingsItem"
+                        Text="تنظیمات"
+                        Width="140"
+                        Command="{StaticResource TraySettingsCommand}"/>
+
+                    <MenuFlyoutSeparator/>
+
+                    <MenuFlyoutItem
+                        x:Name="TrayExitItem"
+                        Text="خروج"
+                        Width="140"
+                        Command="{StaticResource TrayExitCommand}"/>
+
+                </MenuFlyout>
+
+            </tb:TaskbarIcon.ContextFlyout>
+
+        </tb:TaskbarIcon>
+
+    </Grid>
+
+</Window>
