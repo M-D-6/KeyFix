@@ -1,33 +1,58 @@
+<div align="center">
+
+<img src="assets/logo.png" width="150" alt="KeyFix">
+
 # KeyFix
+
+**متنِ تایپ‌شده با چیدمان اشتباه را با یک میانبر درست کنید.**<br>
+**Fix text typed in the wrong keyboard layout with a single shortcut.**
+
+[![Release](https://img.shields.io/github/v/release/M-D-6/KeyFix?style=flat-square&color=b3122f&label=release)](https://github.com/M-D-6/KeyFix/releases)
+[![License](https://img.shields.io/badge/license-GPL--3.0-b3122f?style=flat-square)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%2B-1f1f23?style=flat-square)](#installation)
+[![.NET](https://img.shields.io/badge/.NET-10-1f1f23?style=flat-square)](https://dotnet.microsoft.com/download)
 
 [فارسی](#فارسی) · [English](#english)
 
+</div>
+
 ---
+
+<div dir="rtl">
 
 ## فارسی
 
-**KeyFix** یک برنامهٔ سبک برای ویندوز است که متنِ تایپ‌شده با **زبان یا چیدمان اشتباه صفحه‌کلید** را به چیدمان درست برمی‌گرداند. فقط کافی است متن را انتخاب کنید و میانبر را بزنید.
+**KeyFix** یک برنامهٔ سبک برای ویندوز است که متنِ تایپ‌شده با **زبان یا چیدمان اشتباه صفحه‌کلید** را به چیدمان درست برمی‌گرداند. متن را انتخاب کنید، میانبر را بزنید، تمام.
 
-مثال: اگر به‌جای «سلام» تایپ شده باشد `sghl`، یا به‌جای `hello` تایپ شده باشد «اثممخ»، با یک میانبر متن درست می‌شود، بدون اینکه دوباره تایپش کنید.
+```
+sghl   ⇄   سلام
+اثممخ  ⇄   hello
+```
 
-### امکانات
+### ✨ امکانات
 
-- تبدیل متن انتخاب‌شده بین چیدمان **فارسی و انگلیسی** با یک میانبر سراسری (پیش‌فرض: `Ctrl + K`)
+- تبدیل بین چیدمان **فارسی و انگلیسی** با میانبر سراسری (پیش‌فرض: `Ctrl + K`)
 - تشخیص خودکار جهت تبدیل، حتی در متن ترکیبی
 - تشخیص Caps Lock در متن‌های انگلیسی
 - تغییر خودکار زبان صفحه‌کلید ویندوز پس از تبدیل (اختیاری)
 - میانبر قابل تغییر: ۱ تا ۳ کلید از Ctrl / Alt / Shift به‌علاوهٔ یک کلید
-- آیکون در System Tray با منوی راست‌کلیک (فعال/غیرفعال، تنظیمات، خروج)
+- آیکون System Tray با منوی راست‌کلیک (فعال/غیرفعال، تنظیمات، خروج)
 - اجرا همراه ویندوز و ادامهٔ کار در پس‌زمینه (اختیاری)
 - اعلان نتیجهٔ تبدیل (اختیاری)
-- رابط **فارسی و انگلیسی**، هماهنگ با تم روشن/تاریک ویندوز
+- رابط **فارسی و انگلیسی**، هماهنگ با تم روشن/تاریک ویندوز و هر اندازهٔ نمایش (DPI)
 - بدون اتصال به اینترنت و بدون جمع‌آوری اطلاعات
 
-### نحوهٔ کار
+### 🚀 شروع سریع
+
+1. KeyFix را اجرا کنید؛ در System Tray قرار می‌گیرد.
+2. متنی را که با زبان اشتباه تایپ شده انتخاب کنید.
+3. میانبر را بزنید (پیش‌فرض `Ctrl + K`).
+
+### ⚙️ نحوهٔ کار
 
 KeyFix متن انتخاب‌شده را با شبیه‌سازی `Ctrl+C` می‌خواند، هر کاراکتر را با نقشهٔ چیدمان فارسی و انگلیسی تبدیل می‌کند و نتیجه را با `Ctrl+V` جایگزین می‌کند. محتوای قبلی کلیپ‌بورد پس از پایان کار بازگردانده می‌شود.
 
-### نصب
+### 📦 نصب
 
 از بخش [Releases](https://github.com/M-D-6/KeyFix/releases) نصب‌کنندهٔ مناسب سیستم خود را بگیرید:
 
@@ -39,22 +64,18 @@ KeyFix متن انتخاب‌شده را با شبیه‌سازی `Ctrl+C` می�
 
 حداقل نیاز: ویندوز ۱۰ (نسخهٔ 1809) یا بالاتر. فایل `SHA256SUMS.txt` برای بررسی سلامت فایل‌ها کنار هر ریلیز قرار دارد.
 
-### استفاده
+### ⚠️ محدودیت‌ها
 
-1. KeyFix را اجرا کنید؛ در System Tray قرار می‌گیرد.
-2. متنی را که با زبان اشتباه تایپ شده انتخاب کنید.
-3. میانبر را بزنید (پیش‌فرض `Ctrl + K`).
-
-### محدودیت‌ها
-
-- KeyFix با دسترسی معمولی کاربر اجرا می‌شود. به همین دلیل نمی‌تواند در پنجره‌هایی که **به‌صورت Administrator** اجرا شده‌اند متن را تبدیل کند (محدودیت امنیتی ویندوز).
+- KeyFix با دسترسی معمولی کاربر اجرا می‌شود؛ بنابراین نمی‌تواند در پنجره‌هایی که **به‌صورت Administrator** اجرا شده‌اند متن را تبدیل کند (محدودیت امنیتی ویندوز).
 - اگر میانبر انتخابی را ویندوز یا برنامهٔ دیگری استفاده می‌کند، ثبت آن شکست می‌خورد و باید میانبر دیگری انتخاب کنید.
 
-### تنظیمات
+### 🛠️ تنظیمات
 
 تنظیمات در `%LocalAppData%\KeyFix\Settings.json` ذخیره می‌شود. هنگام حذف برنامه می‌توانید انتخاب کنید که تنظیمات هم پاک شوند.
 
-### ساخت از روی سورس
+### 🧱 ساخت از روی سورس
+
+پیش‌نیازها:
 
 - Windows 10/11 و [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - Visual Studio 2022 یا جدیدتر با workload توسعهٔ دسکتاپ (WinUI)
@@ -63,25 +84,28 @@ KeyFix متن انتخاب‌شده را با شبیه‌سازی `Ctrl+C` می�
 dotnet publish KeyFix/KeyFix.csproj -c Release -p:Platform=x64
 ```
 
-پلتفرم‌های `x86`، `x64` و `ARM64` پشتیبانی می‌شوند و خروجی در `KeyFix/publish/win-<arch>` قرار می‌گیرد. نصب‌کننده با [Inno Setup](https://jrsoftware.org/isinfo.php) از روی `KeyFix.Installer/KeyFix.iss` ساخته می‌شود. ریلیزهای رسمی با GitHub Actions ساخته می‌شوند: هر تگ به شکل `vX.Y.Z` (مثل `v1.0.0`) سه نصب‌کننده را می‌سازد و در Releases قرار می‌دهد.
+پلتفرم‌های `x86`، `x64` و `ARM64` پشتیبانی می‌شوند و خروجی در `KeyFix/publish/win-<arch>` قرار می‌گیرد. نصب‌کننده با [Inno Setup](https://jrsoftware.org/isinfo.php) از روی `KeyFix.Installer/KeyFix.iss` ساخته می‌شود. ریلیزهای رسمی با GitHub Actions ساخته می‌شوند: هر تگ به شکل `vX.Y.Z` (مثل `v1.0.1`) سه نصب‌کننده را می‌سازد و در Releases قرار می‌دهد.
 
-### مجوز
+### 📄 مجوز
 
 KeyFix یک نرم‌افزار آزاد است و تحت **GNU General Public License نسخهٔ ۳** (GPL-3.0) منتشر شده است. متن کامل مجوز در فایل [LICENSE](LICENSE) آمده است.
 
-Copyright © 2026 M-D-6
+</div>
 
 ---
 
 ## English
 
-**KeyFix** is a lightweight Windows utility that fixes text typed with the **wrong keyboard language or layout**. Select the text, press a shortcut, and it is converted to the correct layout without retyping.
+**KeyFix** is a lightweight Windows utility that fixes text typed with the **wrong keyboard language or layout**. Select the text, press a shortcut, done.
 
-Example: if you typed `sghl` instead of «سلام», or «اثممخ» instead of `hello`, one shortcut fixes it.
+```
+sghl   ⇄   سلام
+اثممخ  ⇄   hello
+```
 
-### Features
+### ✨ Features
 
-- Converts the selected text between the **Persian and English** layouts with a global shortcut (default: `Ctrl + K`)
+- Converts between the **Persian and English** layouts with a global shortcut (default: `Ctrl + K`)
 - Detects the conversion direction automatically, even in mixed text
 - Caps Lock detection for English text
 - Optionally switches the Windows keyboard language to match the converted text
@@ -89,14 +113,20 @@ Example: if you typed `sghl` instead of «سلام», or «اثممخ» instead 
 - System Tray icon with a right-click menu (enable/disable, settings, exit)
 - Optional start with Windows and running in the background
 - Optional conversion notifications
-- **Persian and English** interface that follows the Windows light/dark theme
+- **Persian and English** interface that follows the Windows light/dark theme and any display scale (DPI)
 - No network access and no data collection
 
-### How it works
+### 🚀 Quick start
+
+1. Start KeyFix; it lives in the System Tray.
+2. Select text that was typed with the wrong layout.
+3. Press the shortcut (default `Ctrl + K`).
+
+### ⚙️ How it works
 
 KeyFix reads the selection by sending `Ctrl+C`, maps each character between the Persian and English layouts, and pastes the result with `Ctrl+V`. Your previous clipboard content is restored afterwards.
 
-### Installation
+### 📦 Installation
 
 Download the installer for your system from [Releases](https://github.com/M-D-6/KeyFix/releases):
 
@@ -108,22 +138,18 @@ Download the installer for your system from [Releases](https://github.com/M-D-6/
 
 Requires Windows 10 (version 1809) or later. A `SHA256SUMS.txt` file is attached to each release for verifying downloads.
 
-### Usage
-
-1. Start KeyFix; it lives in the System Tray.
-2. Select text that was typed with the wrong layout.
-3. Press the shortcut (default `Ctrl + K`).
-
-### Limitations
+### ⚠️ Limitations
 
 - KeyFix runs without elevation, so it cannot convert text in windows running **as Administrator** (a Windows security restriction).
 - If the chosen shortcut is already used by Windows or another app, registration fails and you need to pick another one.
 
-### Settings
+### 🛠️ Settings
 
 Settings are stored in `%LocalAppData%\KeyFix\Settings.json`. The uninstaller lets you choose whether to delete them.
 
-### Building from source
+### 🧱 Building from source
+
+Requirements:
 
 - Windows 10/11 and the [.NET 10 SDK](https://dotnet.microsoft.com/download)
 - Visual Studio 2022 or later with the desktop (WinUI) workload
@@ -132,10 +158,16 @@ Settings are stored in `%LocalAppData%\KeyFix\Settings.json`. The uninstaller le
 dotnet publish KeyFix/KeyFix.csproj -c Release -p:Platform=x64
 ```
 
-`x86`, `x64` and `ARM64` are supported; output goes to `KeyFix/publish/win-<arch>`. The installer is built with [Inno Setup](https://jrsoftware.org/isinfo.php) from `KeyFix.Installer/KeyFix.iss`. Official releases are built by GitHub Actions: pushing a tag like `v1.0.0` builds the three installers and attaches them to a GitHub Release.
+`x86`, `x64` and `ARM64` are supported; output goes to `KeyFix/publish/win-<arch>`. The installer is built with [Inno Setup](https://jrsoftware.org/isinfo.php) from `KeyFix.Installer/KeyFix.iss`. Official releases are built by GitHub Actions: pushing a tag like `v1.0.1` builds the three installers and attaches them to a GitHub Release.
 
-### License
+### 📄 License
 
 KeyFix is free software, released under the **GNU General Public License, version 3** (GPL-3.0). The full text is in [LICENSE](LICENSE).
 
+---
+
+<div align="center">
+
 Copyright © 2026 M-D-6
+
+</div>

@@ -84,10 +84,8 @@
             VerticalScrollBarVisibility="Auto">
 
             <Grid
-                Width="760"
-                MinWidth="760"
                 MaxWidth="760"
-                HorizontalAlignment="Center"
+                HorizontalAlignment="Stretch"
                 Padding="28,24,28,32"
                 FlowDirection="LeftToRight">
 
@@ -320,10 +318,8 @@
                     x:Name="ShortcutEditorPanel"
                     Grid.Row="6"
                     Margin="0,16,0,0"
-                    Width="600"
-                    MinWidth="600"
                     MaxWidth="600"
-                    HorizontalAlignment="Center"
+                    HorizontalAlignment="Stretch"
                     Padding="22"
                     CornerRadius="16"
                     Visibility="Collapsed"

@@ -4,7 +4,7 @@
 #define MyAppVersion GetEnv("KEYFIX_VERSION")
 #if MyAppVersion == ""
   #undef MyAppVersion
-  #define MyAppVersion "1.0.0"
+  #define MyAppVersion "1.0.1"
 #endif
 
 ; Target architecture, selected with a plain define on the command line:

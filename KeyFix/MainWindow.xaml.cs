@@ -278,10 +278,7 @@ public sealed partial class MainWindow : Window
         InstallMinimumWindowSizeHook(
             _windowHandle);
 
-        _appWindow.Resize(
-            new Windows.Graphics.SizeInt32(
-                InitialWindowWidth,
-                InitialWindowHeight));
+        ApplyInitialWindowSize();
 
         _uiSettings =
             new UISettings();
@@ -394,6 +391,78 @@ public sealed partial class MainWindow : Window
     private static extern bool SetForegroundWindow(
         IntPtr hWnd);
 
+    private void ApplyInitialWindowSize()
+    {
+        int width =
+            ScaleToDpi(
+                _windowHandle,
+                InitialWindowWidth);
+
+        int height =
+            ScaleToDpi(
+                _windowHandle,
+                InitialWindowHeight);
+
+        Windows.Graphics.RectInt32 workArea =
+            DisplayArea.GetFromWindowId(
+                _appWindow.Id,
+                DisplayAreaFallback.Nearest).WorkArea;
+
+        width =
+            Math.Min(
+                width,
+                workArea.Width);
+
+        height =
+            Math.Min(
+                height,
+                workArea.Height);
+
+        Windows.Graphics.PointInt32 position =
+            _appWindow.Position;
+
+        int x =
+            Math.Clamp(
+                position.X,
+                workArea.X,
+                workArea.X + workArea.Width - width);
+
+        int y =
+            Math.Clamp(
+                position.Y,
+                workArea.Y,
+                workArea.Y + workArea.Height - height);
+
+        _appWindow.MoveAndResize(
+            new Windows.Graphics.RectInt32(
+                x,
+                y,
+                width,
+                height));
+    }
+
+    private static int ScaleToDpi(
+        IntPtr windowHandle,
+        int value)
+    {
+        uint dpi =
+            GetDpiForWindow(
+                windowHandle);
+
+        if (dpi == 0)
+        {
+            dpi = 96;
+        }
+
+        return (int)Math.Round(
+            value * (double)dpi / 96.0);
+    }
+
+    [DllImport(
+        "user32.dll")]
+    private static extern uint GetDpiForWindow(
+        IntPtr hWnd);
+
     private void InstallMinimumWindowSizeHook(
         IntPtr windowHandle)
     {
@@ -421,10 +490,14 @@ public sealed partial class MainWindow : Window
                     lParam);
 
             info.ptMinTrackSize.X =
-                MinimumWindowWidth;
+                ScaleToDpi(
+                    hWnd,
+                    MinimumWindowWidth);
 
             info.ptMinTrackSize.Y =
-                MinimumWindowHeight;
+                ScaleToDpi(
+                    hWnd,
+                    MinimumWindowHeight);
 
             Marshal.StructureToPtr(
                 info,
