@@ -187,12 +187,6 @@ int _heldModifiers(int eventVk, bool eventDown) {
   return mods;
 }
 
-void _log(String line) {
-  try {
-    _out?.send(<Object?>['log', line]);
-  } catch (_) {}
-}
-
 void _firePressed() {
   try {
     _out?.send('pressed');

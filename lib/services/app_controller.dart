@@ -20,9 +20,8 @@ import '../platform/windows/windows_registry.dart';
 import 'selection_converter.dart';
 import 'shortcut_recorder.dart';
 
-const String _lre = '‪';
-const String _rle = '‫';
-const String _pdf = '‬';
+const String _rle = '\u202B';
+const String _pdf = '\u202C';
 
 class AppController extends ChangeNotifier
     with TrayListener, WindowListener {

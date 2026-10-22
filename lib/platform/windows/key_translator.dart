@@ -2,7 +2,6 @@ import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
 
-import '../../core/keyboard_layout_map.dart';
 import 'win32.dart' as w;
 
 class WindowsKeyTranslator {
