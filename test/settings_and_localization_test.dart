@@ -53,7 +53,7 @@ void main() {
     expect(s.language, 'en');
     expect(
       const ShortcutDefinition(6, 74).toString(),
-      'Ctrl + Shift + Q',
+      'Ctrl + Shift + J',
     );
   });
 
