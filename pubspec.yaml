@@ -1,0 +1,35 @@
+name: keyfix
+description: Fix text typed in the wrong keyboard layout with a single shortcut. (Flutter port of M-D-6/KeyFix)
+publish_to: 'none'
+version: 1.0.1+1
+
+environment:
+  sdk: '>=3.3.0 <4.0.0'
+  flutter: '>=3.19.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  ffi: ^2.1.0
+
+  window_manager: '>=0.4.3 <0.6.0'
+
+  tray_manager: '>=0.2.3 <0.6.0'
+
+  local_notifier: ^0.1.6
+
+dev_dependencies:
+  flutter_lints: ^4.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/KeyFix.ico
+    - assets/title/KeyFix.png
+  fonts:
+    - family: Vazirmatn
+      fonts:
+        - asset: assets/fonts/Vazirmatn-Regular.ttf
