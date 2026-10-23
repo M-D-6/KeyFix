@@ -29,10 +29,6 @@ jobs:
         shell: pwsh
         run: Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath KeyFix-windows-x64.zip
 
-      - name: Install Inno Setup
-        shell: pwsh
-        run: choco install innosetup --no-progress -y
-
       - name: Build installer
         shell: pwsh
         env:
@@ -43,11 +39,46 @@ jobs:
             $version = $env:RELEASE_TAG -replace '^v', ''
           }
           $env:KEYFIX_VERSION = $version
-          $compilerRoots = @("${env:ProgramFiles(x86)}\Inno Setup*", "$env:ProgramFiles\Inno Setup*")
-          $iscc = Get-ChildItem -Path $compilerRoots -Filter ISCC.exe -File -Recurse -ErrorAction SilentlyContinue | Sort-Object FullName -Descending | Select-Object -First 1
-          if (-not $iscc) { throw 'Inno Setup compiler was not found.' }
-          & $iscc.FullName /Qp KeyFix.iss
+
+          function Find-Iscc {
+            $command = Get-Command ISCC.exe -ErrorAction SilentlyContinue
+            if ($command) { return $command.Source }
+
+            $roots = @(
+              ${env:ProgramFiles(x86)},
+              $env:ProgramFiles,
+              (Join-Path $env:LOCALAPPDATA 'Programs')
+            ) | Where-Object { $_ -and (Test-Path $_) }
+
+            foreach ($root in $roots) {
+              foreach ($dir in Get-ChildItem -Path $root -Directory -Filter 'Inno Setup*' -ErrorAction SilentlyContinue) {
+                $candidate = Join-Path $dir.FullName 'ISCC.exe'
+                if (Test-Path $candidate) { return $candidate }
+              }
+            }
+
+            if ($env:ChocolateyInstall) {
+              $found = Get-ChildItem -Path (Join-Path $env:ChocolateyInstall 'lib') -Filter ISCC.exe -File -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+              if ($found) { return $found.FullName }
+            }
+
+            return $null
+          }
+
+          $iscc = Find-Iscc
+          if (-not $iscc) {
+            choco install innosetup --no-progress -y
+            $iscc = Find-Iscc
+          }
+          if (-not $iscc) {
+            Get-ChildItem -Path ${env:ProgramFiles(x86)}, $env:ProgramFiles -Directory -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
+            throw 'Inno Setup compiler was not found.'
+          }
+
+          Write-Host "Using $iscc"
+          & $iscc /Qp KeyFix.iss
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (-not (Test-Path 'Output\KeyFix-Setup-x64.exe')) { throw 'Installer was not produced.' }
 
       - uses: actions/upload-artifact@v4
         with:
