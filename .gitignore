@@ -9,3 +9,4 @@ windows/flutter/ephemeral/
 .idea/
 .vscode/
 *.iml
+Output/

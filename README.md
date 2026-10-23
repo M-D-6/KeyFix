@@ -1,97 +1,251 @@
+<div align="center">
+
+<img src="docs/logo.png" width="150" alt="KeyFix">
+
 # KeyFix
 
-Fix text typed in the wrong keyboard layout with one shortcut.
-متنِ تایپ‌شده با چیدمان اشتباه را با یک میانبر درست کنید.
+**متنِ تایپ‌شده با چیدمان اشتباه را با یک میانبر درست کنید.**<br>
+**Fix text typed in the wrong keyboard layout with a single shortcut.**
+
+[![Release](https://img.shields.io/github/v/release/M-D-6/KeyFix?style=flat-square&color=b3122f&label=release)](https://github.com/M-D-6/KeyFix/releases)
+[![License](https://img.shields.io/badge/license-GPL--3.0-b3122f?style=flat-square)](LICENSE)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%2B-1f1f23?style=flat-square)](#installation)
+[![Flutter](https://img.shields.io/badge/Flutter-3.19%2B-02569B?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev)
+
+[فارسی](#فارسی) · [English](#english)
+
+</div>
+
+---
+
+<div dir="rtl">
+
+## فارسی
+
+**KeyFix** یک برنامهٔ سبک برای ویندوز است که متنِ تایپ‌شده با **زبان یا چیدمان اشتباه صفحه‌کلید** را به چیدمان درست برمی‌گرداند. متن را انتخاب کنید، میانبر را بزنید، تمام.
 
 ```
-sghl   <->   سلام
-اثممخ  <->   hello
+sghl   ⇄   سلام
+اثممخ  ⇄   hello
 ```
 
-A Flutter port of [M-D-6/KeyFix](https://github.com/M-D-6/KeyFix) (Persian <-> English).
-Windows is supported now; Linux and macOS are planned. All OS access sits behind
-`PlatformInterop`, so those platforms only need a new implementation.
+### ✨ امکانات
 
-## Features
+- تبدیل بین چیدمان **فارسی و انگلیسی** با میانبر سراسری (پیش‌فرض: `Alt + Shift`)
+- تشخیص خودکار جهت تبدیل، حتی در متن ترکیبی
+- تشخیص Caps Lock برای تبدیل متن انگلیسی
+- تغییر خودکار زبان صفحه‌کلید ویندوز پس از تبدیل (اختیاری)
+- میانبر قابل تغییر؛ ترکیب کلیدهای کمکی یا کلیدهای مستقل مجاز، مطابق راهنمای داخل برنامه
+- آیکون System Tray با منوی راست‌کلیک برای فعال/غیرفعال‌کردن، بازکردن تنظیمات و خروج
+- اجرا همراه ویندوز و ادامهٔ کار در پس‌زمینه (اختیاری)
+- اعلان نتیجهٔ تبدیل (اختیاری)
+- رابط **فارسی و انگلیسی** با پشتیبانی از راست‌چین، تم روشن/تاریک و رنگ تأکیدی ویندوز
+- بدون اتصال به اینترنت و بدون جمع‌آوری اطلاعات
 
-- Converts the selected text between Persian and English, direction detected
-  automatically (also for mixed text), with Caps Lock detection
-- Optional automatic switch of the keyboard language after converting
-- Flexible global shortcut: `Alt + Shift` alone (any two of Ctrl/Alt/Shift),
-  modifiers + any key, or one special key (`Pause`, `F9`, `Print Screen` ...)
-- Tray icon, start with Windows, background mode, optional notifications
-- Persian and English UI (RTL aware), light/dark, system accent colour
-- Single instance (a second launch just shows the running window), no network access, no data collection
+### 🚀 شروع سریع
 
-## Download
+1. KeyFix را اجرا کنید؛ برنامه در System Tray قرار می‌گیرد.
+2. متنی را که با چیدمان اشتباه تایپ شده انتخاب کنید.
+3. میانبر را بزنید (پیش‌فرض `Alt + Shift`).
 
-Get `KeyFix-windows-x64.zip` from the
-[Releases](../../releases) page, extract it anywhere and run `KeyFix.exe`.
-No installer and no extra runtime are needed.
+برای تغییر میانبر، گزینهٔ **Change shortcut** را در برنامه باز کنید، ترکیب جدید را ثبت و ذخیره کنید. نماد اطلاعات در پنجرهٔ میانبر، ترکیب‌های مجاز را توضیح می‌دهد.
 
-## Usage
+### ⚙️ نحوهٔ کار
 
-1. Select text typed in the wrong layout, in any application.
-2. Press the shortcut (default `Alt + Shift`).
-3. The text is replaced with the corrected version.
+KeyFix متن انتخاب‌شده را با ارسال `Ctrl+C` می‌خواند، کاراکترها را با استفاده از چیدمان‌های فارسی و انگلیسی ویندوز تبدیل می‌کند و با `Ctrl+V` جایگزین می‌کند. محتوای قبلی کلیپ‌بورد پس از پایان کار بازیابی می‌شود.
 
-Use **Change shortcut** to record a new one. Press the keys, then Save. The
-small info icon in the dialog lists the allowed combinations.
+### 📦 نصب
 
-## Build from source (Windows 10 1809+ / 11)
+از بخش [Releases](https://github.com/M-D-6/KeyFix/releases) نسخهٔ مناسب را دریافت کنید:
 
-Requires Flutter (stable, Windows desktop enabled) and Visual Studio 2022 with
-"Desktop development with C++".
+| فایل | مناسب برای |
+|---|---|
+| `KeyFix-Setup-x64.exe` | نصب برنامه در ویندوز ۶۴ بیتی |
+| `KeyFix-windows-x64.zip` | نسخهٔ قابل‌حمل برای ویندوز ۶۴ بیتی |
+
+برای نصب معمولی، فایل نصب‌کننده را اجرا کنید. نصب‌کننده به زبان فارسی و انگلیسی در دسترس است و امکان ساخت میانبر منوی Start و دسکتاپ را می‌دهد. هنگام حذف برنامه می‌توانید تعیین کنید که تنظیمات باقی بمانند یا پاک شوند.
+
+برای استفاده از نسخهٔ قابل‌حمل، فایل ZIP را در پوشه‌ای دلخواه استخراج و `KeyFix.exe` را اجرا کنید؛ به نصب جداگانهٔ Flutter نیاز نیست.
+
+حداقل نیاز: ویندوز ۱۰ (نسخهٔ 1809) یا ویندوز ۱۱. فایل‌های منتشرشدهٔ فعلی برای معماری x64 هستند.
+
+### ⚠️ محدودیت‌ها
+
+- KeyFix با دسترسی معمولی کاربر اجرا می‌شود؛ بنابراین ممکن است نتواند در پنجره‌هایی که **به‌صورت Administrator** اجرا شده‌اند متن را تبدیل کند (محدودیت امنیتی ویندوز).
+- اگر میانبر انتخابی را ویندوز یا برنامهٔ دیگری استفاده کند، ثبت آن ممکن است شکست بخورد؛ میانبر دیگری انتخاب کنید.
+- در حال حاضر نسخهٔ Flutter فقط از ویندوز پشتیبانی می‌کند.
+
+### 🛠️ تنظیمات و گزارش خطا
+
+تنظیمات در `%LocalAppData%\KeyFix\Settings.json` و گزارش عیب‌یابی در `%LocalAppData%\KeyFix\log.txt` ذخیره می‌شوند.
+
+### 🧱 ساخت از روی سورس
+
+پیش‌نیازها:
+
+- ویندوز ۱۰/۱۱
+- Flutter نسخهٔ stable (حداقل نسخهٔ سازگار در `pubspec.yaml` مشخص شده است)
+- Visual Studio 2022 یا جدیدتر با workload **Desktop development with C++**
+
+در PowerShell و ریشهٔ پروژه اجرا کنید:
 
 ```powershell
+flutter doctor
 flutter pub get
+flutter analyze
 flutter test
 flutter run -d windows
 flutter build windows --release
 ```
 
-The release build is in `build\windows\x64\runner\Release\KeyFix.exe`.
+فایل اجرایی در `build\windows\x64\runner\Release\KeyFix.exe` ساخته می‌شود. برای ساخت نصب‌کنندهٔ ویندوز، [Inno Setup](https://jrsoftware.org/isinfo.php) را نصب کنید و پس از build دستور زیر را در ریشهٔ پروژه اجرا کنید:
 
-## Publishing a release
+```powershell
+iscc KeyFix.iss
+```
 
-Update `version` in `pubspec.yaml`, then push a tag:
+خروجی نصب‌کننده در `Output\KeyFix-Setup-x64.exe` قرار می‌گیرد.
+
+### 🚀 انتشار نسخه
+
+نسخهٔ برنامه را در `pubspec.yaml` به‌روزرسانی کنید و تگ انتشار را push کنید:
 
 ```powershell
 git tag v1.0.1
 git push origin v1.0.1
 ```
 
-The `Build Windows` workflow analyzes, tests, builds and attaches
-`KeyFix-windows-x64.zip` to a new GitHub Release. It can also be started
-manually from the Actions tab to get the zip as a build artifact.
+گردش‌کار GitHub Actions با تگ‌هایی مانند `v1.0.1` ابتدا `flutter analyze` و `flutter test` را اجرا می‌کند، سپس نسخهٔ قابل‌حمل و نصب‌کننده را می‌سازد و هر دو را به GitHub Release پیوست می‌کند. گردش‌کار را می‌توان از زبانهٔ Actions هم به‌صورت دستی اجرا کرد.
 
-## How it works
+### 🧩 ساختار کد
 
-Ctrl+C is sent with `SendInput`, the clipboard text is mapped between the two
-layouts, Ctrl+V pastes it and the previous clipboard content is restored.
+- `lib/core` — تبدیل متن، نقشهٔ چیدمان، قوانین میانبر، تنظیمات و بومی‌سازی
+- `lib/platform` — لایهٔ ارتباط با سیستم‌عامل و پیاده‌سازی ویندوز
+- `lib/services` — کنترل برنامه، تبدیل متن انتخاب‌شده و ثبت میانبر
+- `lib/ui` — تم، پنجرهٔ اصلی و رابط تنظیم میانبر
+- `test` — تست‌های تبدیل صفحه‌کلید، تنظیمات، بومی‌سازی و میانبرها
 
-The layouts are read from Windows (`LoadKeyboardLayout`, `MapVirtualKeyEx`,
-`ToUnicodeEx`), not from a hard-coded table. The shortcut is a low-level
-keyboard hook running in its own isolate; it is paused while a new shortcut is
-recorded.
+### 📄 مجوز
 
-Settings and a diagnostic log live in `%LocalAppData%\KeyFix`.
+KeyFix یک نرم‌افزار آزاد و مشتق از نسخهٔ اصلی KeyFix است و تحت **GNU General Public License نسخهٔ ۳** (GPL-3.0) منتشر شده است. متن کامل مجوز در فایل [LICENSE](LICENSE) آمده است.
 
-## Look
+</div>
 
-Solid Material 3 look: colours come from the Windows accent colour and the
-light/dark setting, cards are one tonal step lighter than the background.
-The bundled font is [Vazirmatn](https://github.com/rastikerdar/vazirmatn) (SIL OFL 1.1).
+---
 
-## Code layout
+## English
+
+**KeyFix** is a lightweight Windows utility that fixes text typed with the **wrong keyboard language or layout**. Select the text, press a shortcut, done.
 
 ```
-lib/core      converter, layout map, shortcut rules, settings, localization
-lib/platform  PlatformInterop and the Windows implementation
-lib/services  SelectionConverter, ShortcutRecorder, AppController
-lib/ui        theme, widgets, home page
+sghl   ⇄   سلام
+اثممخ  ⇄   hello
 ```
 
-## License
+### ✨ Features
 
-GPL-3.0, like the original (derivative work).
+- Converts between the **Persian and English** layouts with a global shortcut (default: `Alt + Shift`)
+- Detects conversion direction automatically, including mixed text
+- Detects Caps Lock when converting English text
+- Optionally switches the Windows keyboard language to match the converted text
+- Customizable shortcut; supported combinations are described in the in-app shortcut dialog
+- System Tray icon and context menu to enable/disable KeyFix, open the settings window, or exit
+- Optional start with Windows and background operation
+- Optional conversion notifications
+- **Persian and English** interface with RTL support, light/dark appearance, and the Windows accent colour
+- No network access and no data collection
+
+### 🚀 Quick start
+
+1. Start KeyFix; it appears in the System Tray.
+2. Select text typed with the wrong keyboard layout.
+3. Press the shortcut (default `Alt + Shift`).
+
+To change the shortcut, open **Change shortcut**, record a new combination, and save it. The information icon in the dialog lists the supported combinations.
+
+### ⚙️ How it works
+
+KeyFix reads the selected text by sending `Ctrl+C`, converts characters using the Persian and English layouts available in Windows, and replaces the selection with `Ctrl+V`. The previous clipboard content is restored afterwards.
+
+### 📦 Installation
+
+Download a release from [GitHub Releases](https://github.com/M-D-6/KeyFix/releases):
+
+| File | For |
+|---|---|
+| `KeyFix-Setup-x64.exe` | Installing KeyFix on 64-bit Windows |
+| `KeyFix-windows-x64.zip` | Portable build for 64-bit Windows |
+
+Run the installer for a standard installation. It supports English and Persian and can create Start Menu and desktop shortcuts. During uninstall, you can choose whether to keep or delete the settings.
+
+For the portable build, extract the ZIP to any folder and run `KeyFix.exe`. You do not need to install Flutter separately.
+
+Requires Windows 10 (version 1809) or Windows 11. Current release artifacts target x64.
+
+### ⚠️ Limitations
+
+- KeyFix runs with normal user privileges, so it may not convert text in windows running **as Administrator** (a Windows security restriction).
+- If the selected shortcut is reserved by Windows or another app, registration may fail; choose a different combination.
+- The Flutter port currently supports Windows only.
+
+### 🛠️ Settings and diagnostics
+
+Settings are stored in `%LocalAppData%\KeyFix\Settings.json`; the diagnostic log is stored in `%LocalAppData%\KeyFix\log.txt`.
+
+### 🧱 Building from source
+
+Requirements:
+
+- Windows 10/11
+- Flutter stable (the minimum compatible version is specified in `pubspec.yaml`)
+- Visual Studio 2022 or later with the **Desktop development with C++** workload
+
+Run these commands in PowerShell from the project root:
+
+```powershell
+flutter doctor
+flutter pub get
+flutter analyze
+flutter test
+flutter run -d windows
+flutter build windows --release
+```
+
+The executable is created at `build\windows\x64\runner\Release\KeyFix.exe`. To build the Windows installer, install [Inno Setup](https://jrsoftware.org/isinfo.php), build the app, then run this command from the project root:
+
+```powershell
+iscc KeyFix.iss
+```
+
+The installer is written to `Output\KeyFix-Setup-x64.exe`.
+
+### 🚀 Publishing a release
+
+Update the app version in `pubspec.yaml`, then push a release tag:
+
+```powershell
+git tag v1.0.1
+git push origin v1.0.1
+```
+
+The GitHub Actions workflow runs `flutter analyze` and `flutter test`, builds the portable archive and installer, and attaches both to the GitHub Release for tags such as `v1.0.1`. It can also be started manually from the Actions tab.
+
+### 🧩 Code layout
+
+- `lib/core` — converter, layout map, shortcut rules, settings, and localization
+- `lib/platform` — platform abstraction and Windows implementation
+- `lib/services` — app controller, selected-text conversion, and shortcut recording
+- `lib/ui` — theme, main window, and shortcut dialog
+- `test` — keyboard conversion, settings, localization, and shortcut tests
+
+### 📄 License
+
+KeyFix is free software and a derivative work of the original KeyFix, released under the **GNU General Public License, version 3** (GPL-3.0). The full text is in [LICENSE](LICENSE).
+
+---
+
+<div align="center">
+
+Copyright © 2026 M-D-6
+
+</div>
