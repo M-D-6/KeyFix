@@ -121,6 +121,16 @@ jobs:
           merge-multiple: true
 
       - name: Publish release
+        shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" dist/* --repo "${{ github.repository }}" --title "KeyFix ${{ github.ref_name }}" --generate-notes
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
+        run: |
+          mapfile -t files < <(find dist -type f \( -name '*.zip' -o -name '*.exe' \) | sort)
+          printf '%s\n' "${files[@]}"
+          if gh release view "$TAG" --repo "$REPO" > /dev/null 2>&1; then
+            gh release upload "$TAG" "${files[@]}" --repo "$REPO" --clobber
+          else
+            gh release create "$TAG" "${files[@]}" --repo "$REPO" --title "KeyFix $TAG" --generate-notes
+          fi
