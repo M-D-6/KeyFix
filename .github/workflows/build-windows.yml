@@ -24,9 +24,23 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: subosito/flutter-action@v2
+        if: matrix.arch == 'x64'
         with:
           channel: stable
           cache: true
+
+      - name: Install Flutter (arm64)
+        if: matrix.arch == 'arm64'
+        shell: pwsh
+        run: |
+          git clone --depth 1 --branch stable https://github.com/flutter/flutter.git "$env:RUNNER_TEMP\flutter"
+          "$env:RUNNER_TEMP\flutter\bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+          $flutterBin = "$env:RUNNER_TEMP\flutter\bin"
+          Write-Host "PROCESSOR_ARCHITECTURE=$env:PROCESSOR_ARCHITECTURE"
+          & "$flutterBin\flutter.bat" --version
+          $dart = & "$flutterBin\dart.bat" --version 2>&1 | Out-String
+          Write-Host $dart
+          if ($dart -notmatch 'windows_arm64') { throw "Flutter picked a non-arm64 Dart SDK: $dart" }
 
       - run: flutter pub get
       - run: flutter analyze

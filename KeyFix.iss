@@ -42,9 +42,6 @@ SetupIconFile={#MyAppIcon}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 UninstallDisplayName={#MyAppName}
 #if MyArch == "arm64"
-#if Ver >= 0x07000000
-SetupArchitecture=arm64
-#endif
 ArchitecturesAllowed=arm64
 ArchitecturesInstallIn64BitMode=arm64
 #else
