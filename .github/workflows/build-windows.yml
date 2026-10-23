@@ -11,7 +11,15 @@ permissions:
 
 jobs:
   build:
-    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            runner: windows-latest
+          - arch: arm64
+            runner: windows-11-arm
+    runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v4
 
@@ -27,12 +35,13 @@ jobs:
 
       - name: Package portable build
         shell: pwsh
-        run: Compress-Archive -Path build\windows\x64\runner\Release\* -DestinationPath KeyFix-windows-x64.zip
+        run: Compress-Archive -Path "build\windows\${{ matrix.arch }}\runner\Release\*" -DestinationPath "KeyFix-windows-${{ matrix.arch }}.zip"
 
       - name: Build installer
         shell: pwsh
         env:
           RELEASE_TAG: ${{ github.ref_name }}
+          KEYFIX_ARCH: ${{ matrix.arch }}
         run: |
           $version = (Select-String -Path pubspec.yaml -Pattern '^version:\s*([0-9]+\.[0-9]+\.[0-9]+)').Matches[0].Groups[1].Value
           if ($env:GITHUB_REF -like 'refs/tags/v*') {
@@ -78,18 +87,26 @@ jobs:
           Write-Host "Using $iscc"
           & $iscc /Qp KeyFix.iss
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          if (-not (Test-Path 'Output\KeyFix-Setup-x64.exe')) { throw 'Installer was not produced.' }
+          if (-not (Test-Path "Output\KeyFix-Setup-$env:KEYFIX_ARCH.exe")) { throw 'Installer was not produced.' }
 
       - uses: actions/upload-artifact@v4
         with:
-          name: KeyFix-windows-x64
+          name: KeyFix-windows-${{ matrix.arch }}
           path: |
-            KeyFix-windows-x64.zip
-            Output/KeyFix-Setup-x64.exe
+            KeyFix-windows-${{ matrix.arch }}.zip
+            Output/KeyFix-Setup-${{ matrix.arch }}.exe
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
 
       - name: Publish release
-        if: startsWith(github.ref, 'refs/tags/v')
-        shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "${{ github.ref_name }}" KeyFix-windows-x64.zip Output/KeyFix-Setup-x64.exe --title "KeyFix ${{ github.ref_name }}" --generate-notes
+        run: gh release create "${{ github.ref_name }}" dist/* --repo "${{ github.repository }}" --title "KeyFix ${{ github.ref_name }}" --generate-notes

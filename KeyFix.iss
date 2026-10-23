@@ -1,3 +1,9 @@
+#define MyArch GetEnv("KEYFIX_ARCH")
+#if MyArch != "arm64"
+  #undef MyArch
+  #define MyArch "x64"
+#endif
+
 #define MyAppName "KeyFix"
 #define MyAppVersion GetEnv("KEYFIX_VERSION")
 #if MyAppVersion == ""
@@ -10,7 +16,7 @@
 #define MyAppExeName "KeyFix.exe"
 #define MyAppId "{{A7D4E8C2-5F31-4B96-91D7-62C8A4E3F105}"
 #define MyAppIcon "assets\KeyFix.ico"
-#define MyPublishDir "build\windows\x64\runner\Release"
+#define MyPublishDir "build\windows\" + MyArch + "\runner\Release"
 #define MyOutputDir "Output"
 
 [Setup]
@@ -31,15 +37,24 @@ AppUpdatesURL={#MyAppPublisherURL}/releases
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 OutputDir={#MyOutputDir}
-OutputBaseFilename=KeyFix-Setup-x64
+OutputBaseFilename=KeyFix-Setup-{#MyArch}
 SetupIconFile={#MyAppIcon}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 UninstallDisplayName={#MyAppName}
+#if MyArch == "arm64"
+#if Ver >= 0x07000000
+SetupArchitecture=arm64
+#endif
+ArchitecturesAllowed=arm64
+ArchitecturesInstallIn64BitMode=arm64
+#else
 #if Ver >= 0x07000000
 SetupArchitecture=x64
 #endif
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
+UseSetupLdr=x64
+#endif
 PrivilegesRequired=admin
 MinVersion=10.0
 WizardStyle=modern windows11 dynamic includetitlebar
@@ -61,8 +76,7 @@ UninstallLogMode=append
 RedirectionGuard=yes
 Compression=lzma
 SolidCompression=yes
-UseSetupLdr=x64
-OutputManifestFile=KeyFix-Setup-x64.manifest
+OutputManifestFile=KeyFix-Setup-{#MyArch}.manifest
 
 [Languages]
 Name: "en"; MessagesFile: "compiler:Default.isl"

@@ -9,7 +9,7 @@
 
 [![Release](https://img.shields.io/github/v/release/M-D-6/KeyFix?style=flat-square&color=b3122f&label=release)](https://github.com/M-D-6/KeyFix/releases)
 [![License](https://img.shields.io/badge/license-GPL--3.0-b3122f?style=flat-square)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Windows%2010%2B-1f1f23?style=flat-square)](#installation)
+[![Platform](https://img.shields.io/badge/platform-Windows%2010%2B%20(x64%20%7C%20ARM64)-1f1f23?style=flat-square)](#installation)
 [![Flutter](https://img.shields.io/badge/Flutter-3.19%2B-02569B?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev)
 
 [فارسی](#فارسی) · [English](#english)
@@ -60,14 +60,16 @@ KeyFix متن انتخاب‌شده را با ارسال `Ctrl+C` می‌خوا�
 
 | فایل | مناسب برای |
 |---|---|
-| `KeyFix-Setup-x64.exe` | نصب برنامه در ویندوز ۶۴ بیتی |
-| `KeyFix-windows-x64.zip` | نسخهٔ قابل‌حمل برای ویندوز ۶۴ بیتی |
+| `KeyFix-Setup-x64.exe` | نصب برنامه در ویندوز ۶۴ بیتی (Intel/AMD) |
+| `KeyFix-Setup-arm64.exe` | نصب برنامه در ویندوز ARM64 |
+| `KeyFix-windows-x64.zip` | نسخهٔ قابل‌حمل برای x64 |
+| `KeyFix-windows-arm64.zip` | نسخهٔ قابل‌حمل برای ARM64 |
 
 برای نصب معمولی، فایل نصب‌کننده را اجرا کنید. نصب‌کننده به زبان فارسی و انگلیسی در دسترس است و امکان ساخت میانبر منوی Start و دسکتاپ را می‌دهد. هنگام حذف برنامه می‌توانید تعیین کنید که تنظیمات باقی بمانند یا پاک شوند.
 
 برای استفاده از نسخهٔ قابل‌حمل، فایل ZIP را در پوشه‌ای دلخواه استخراج و `KeyFix.exe` را اجرا کنید؛ به نصب جداگانهٔ Flutter نیاز نیست.
 
-حداقل نیاز: ویندوز ۱۰ (نسخهٔ 1809) یا ویندوز ۱۱. فایل‌های منتشرشدهٔ فعلی برای معماری x64 هستند.
+حداقل نیاز: ویندوز ۱۰ (نسخهٔ 1809) یا ویندوز ۱۱. نسخه‌های x64 و ARM64 منتشر می‌شوند؛ ویندوز ۳۲ بیتی پشتیبانی نمی‌شود.
 
 ### ⚠️ محدودیت‌ها
 
@@ -98,24 +100,13 @@ flutter run -d windows
 flutter build windows --release
 ```
 
-فایل اجرایی در `build\windows\x64\runner\Release\KeyFix.exe` ساخته می‌شود. برای ساخت نصب‌کنندهٔ ویندوز، [Inno Setup](https://jrsoftware.org/isinfo.php) را نصب کنید و پس از build دستور زیر را در ریشهٔ پروژه اجرا کنید:
+فایل اجرایی در `build\windows\<arch>\runner\Release\KeyFix.exe` ساخته می‌شود (`x64` یا `arm64`، بسته به معماری دستگاه). برای ساخت نصب‌کنندهٔ ویندوز، [Inno Setup](https://jrsoftware.org/isinfo.php) را نصب کنید و پس از build دستور زیر را در ریشهٔ پروژه اجرا کنید:
 
 ```powershell
 iscc KeyFix.iss
 ```
 
-خروجی نصب‌کننده در `Output\KeyFix-Setup-x64.exe` قرار می‌گیرد.
-
-### 🚀 انتشار نسخه
-
-نسخهٔ برنامه را در `pubspec.yaml` به‌روزرسانی کنید و تگ انتشار را push کنید:
-
-```powershell
-git tag v1.0.1
-git push origin v1.0.1
-```
-
-گردش‌کار GitHub Actions با تگ‌هایی مانند `v1.0.1` ابتدا `flutter analyze` و `flutter test` را اجرا می‌کند، سپس نسخهٔ قابل‌حمل و نصب‌کننده را می‌سازد و هر دو را به GitHub Release پیوست می‌کند. گردش‌کار را می‌توان از زبانهٔ Actions هم به‌صورت دستی اجرا کرد.
+خروجی نصب‌کننده در `Output\KeyFix-Setup-x64.exe` قرار می‌گیرد. برای ARM64 پیش از اجرا مقدار `$env:KEYFIX_ARCH = 'arm64'` را تنظیم کنید.
 
 ### 🧩 ساختار کد
 
@@ -173,14 +164,16 @@ Download a release from [GitHub Releases](https://github.com/M-D-6/KeyFix/releas
 
 | File | For |
 |---|---|
-| `KeyFix-Setup-x64.exe` | Installing KeyFix on 64-bit Windows |
-| `KeyFix-windows-x64.zip` | Portable build for 64-bit Windows |
+| `KeyFix-Setup-x64.exe` | Installer for 64-bit Windows (Intel/AMD) |
+| `KeyFix-Setup-arm64.exe` | Installer for Windows on ARM64 |
+| `KeyFix-windows-x64.zip` | Portable build for x64 |
+| `KeyFix-windows-arm64.zip` | Portable build for ARM64 |
 
 Run the installer for a standard installation. It supports English and Persian and can create Start Menu and desktop shortcuts. During uninstall, you can choose whether to keep or delete the settings.
 
 For the portable build, extract the ZIP to any folder and run `KeyFix.exe`. You do not need to install Flutter separately.
 
-Requires Windows 10 (version 1809) or Windows 11. Current release artifacts target x64.
+Requires Windows 10 (version 1809) or Windows 11. x64 and ARM64 builds are published; 32-bit Windows is not supported.
 
 ### ⚠️ Limitations
 
@@ -211,24 +204,13 @@ flutter run -d windows
 flutter build windows --release
 ```
 
-The executable is created at `build\windows\x64\runner\Release\KeyFix.exe`. To build the Windows installer, install [Inno Setup](https://jrsoftware.org/isinfo.php), build the app, then run this command from the project root:
+The executable is created at `build\windows\<arch>\runner\Release\KeyFix.exe` (`x64` or `arm64`, matching your machine). To build the Windows installer, install [Inno Setup](https://jrsoftware.org/isinfo.php), build the app, then run this command from the project root:
 
 ```powershell
 iscc KeyFix.iss
 ```
 
-The installer is written to `Output\KeyFix-Setup-x64.exe`.
-
-### 🚀 Publishing a release
-
-Update the app version in `pubspec.yaml`, then push a release tag:
-
-```powershell
-git tag v1.0.1
-git push origin v1.0.1
-```
-
-The GitHub Actions workflow runs `flutter analyze` and `flutter test`, builds the portable archive and installer, and attaches both to the GitHub Release for tags such as `v1.0.1`. It can also be started manually from the Actions tab.
+The installer is written to `Output\KeyFix-Setup-x64.exe`. On ARM64, set `$env:KEYFIX_ARCH = 'arm64'` first.
 
 ### 🧩 Code layout
 
