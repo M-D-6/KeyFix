@@ -258,3 +258,10 @@ final int inputSize = is64Bit ? 40 : 28;
 final int inputUnionOffset = is64Bit ? 8 : 4;
 
 final int msgSize = is64Bit ? 48 : 28;
+
+final int Function() GetCurrentProcess = _kernel32
+    .lookupFunction<IntPtr Function(), int Function()>('GetCurrentProcess');
+
+final int Function(int, int, int) SetProcessWorkingSetSize =
+    _kernel32.lookupFunction<Int32 Function(IntPtr, IntPtr, IntPtr),
+        int Function(int, int, int)>('SetProcessWorkingSetSize');

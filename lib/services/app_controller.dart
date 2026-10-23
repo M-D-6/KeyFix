@@ -15,6 +15,7 @@ import '../core/shortcut_definition.dart';
 import '../core/app_log.dart';
 import '../core/keyboard_layout_map.dart';
 import '../platform/windows/keyboard_hook.dart';
+import '../platform/windows/memory_trimmer.dart';
 import '../platform/windows/windows_interop.dart';
 import '../platform/windows/windows_registry.dart';
 import 'selection_converter.dart';
@@ -52,6 +53,9 @@ class AppController extends ChangeNotifier
 
   bool _busy = false;
   bool _allowRealClose = false;
+  bool _windowHidden = false;
+  Timer? _trimTimer;
+  Timer? _trimLoop;
 
   String _statusText = '';
   int _hotkeyErrorCode = 0;
@@ -137,6 +141,10 @@ class AppController extends ChangeNotifier
     settingsManager.setStartWithWindows(actual);
 
     _updateStatusForEnabledState();
+
+    if (backgroundMode) {
+      _setWindowHidden(true);
+    }
 
     if (!backgroundMode && _hook == null) {
       _showLocalizedError('HotkeyRegistrationFailed', _hotkeyErrorCode);
@@ -374,6 +382,7 @@ class AppController extends ChangeNotifier
       _showStatusNotification(error);
     } finally {
       _busy = false;
+      _scheduleTrim();
     }
   }
 
@@ -511,7 +520,41 @@ class AppController extends ChangeNotifier
     }
   }
 
+  void _scheduleTrim() {
+    if (!_windowHidden) {
+      return;
+    }
+    _trimTimer?.cancel();
+    _trimTimer = Timer(const Duration(seconds: 2), () {
+      if (_windowHidden) {
+        PaintingBinding.instance.imageCache.clear();
+        MemoryTrimmer.trim();
+      }
+    });
+  }
+
+  void _setWindowHidden(bool hidden) {
+    _windowHidden = hidden;
+    _trimTimer?.cancel();
+    _trimLoop?.cancel();
+    _trimLoop = null;
+    if (hidden) {
+      _scheduleTrim();
+      _trimLoop = Timer.periodic(
+        const Duration(seconds: 60),
+        (_) => MemoryTrimmer.trim(),
+      );
+    }
+  }
+
+  @override
+  void onWindowMinimize() => _setWindowHidden(true);
+
+  @override
+  void onWindowRestore() => _setWindowHidden(false);
+
   Future<void> showMainWindow() async {
+    _setWindowHidden(false);
     await windowManager.show();
     if (await windowManager.isMinimized()) {
       await windowManager.restore();
@@ -522,7 +565,7 @@ class AppController extends ChangeNotifier
 
   Future<void> hideMainWindow() async {
     await windowManager.hide();
-    PaintingBinding.instance.imageCache.clear();
+    _setWindowHidden(true);
     notifyListeners();
   }
 
@@ -575,6 +618,8 @@ class AppController extends ChangeNotifier
 
   @override
   void dispose() {
+    _trimTimer?.cancel();
+    _trimLoop?.cancel();
     windowManager.removeListener(this);
     trayManager.removeListener(this);
     _stopHook();
