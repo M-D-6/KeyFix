@@ -12,12 +12,19 @@ import 'x11.dart' as x;
 import 'xkb.dart';
 
 class _LinuxSnapshot implements ClipboardSnapshotHandle {
-  _LinuxSnapshot(this.text, this.canRestore);
+  _LinuxSnapshot(
+    this.text,
+    this.canRestore, {
+    this.containsUnsupportedData = false,
+  });
 
   final String? text;
 
   @override
   final bool canRestore;
+
+  @override
+  final bool containsUnsupportedData;
 }
 
 const Set<String> _terminalClasses = <String>{
@@ -90,7 +97,7 @@ class LinuxInterop implements PlatformInterop {
   KeyTranslator get persianTranslator => _persian.translate;
 
   @override
-  int get pollIntervalMs => 20;
+  int get pollIntervalMs => 50;
 
   @override
   bool get needsCopySentinel => true;
@@ -280,11 +287,11 @@ class LinuxInterop implements PlatformInterop {
   }
 
   @override
-  String? readSelectionDirect() {
+  Future<String?> readSelectionDirect() async {
     if (!_terminalFocused()) {
       return null;
     }
-    return _clipboard.read(primary: true) ?? '';
+    return await _clipboard.read(primary: true) ?? '';
   }
 
   bool _sendKeys(List<int> modifiers, int keycode) {
@@ -327,25 +334,38 @@ class LinuxInterop implements PlatformInterop {
   }
 
   @override
-  int clipboardSequenceNumber() {
-    final String? text = _clipboard.read();
+  Future<int> clipboardSequenceNumber() async {
+    final String? text = await _clipboard.read();
     return text == null ? 0 : text.hashCode;
   }
 
   @override
-  String? getClipboardText() => _clipboard.read();
+  Future<String?> getClipboardText() => _clipboard.read();
 
   @override
-  bool setClipboardText(String text) => _clipboard.write(text);
+  Future<bool> setClipboardText(String text) => _clipboard.write(text);
 
   @override
-  ClipboardSnapshotHandle saveClipboard() {
-    return _LinuxSnapshot(_clipboard.read(), _clipboard.available);
+  Future<ClipboardSnapshotHandle> saveClipboard() async {
+    final String? text = await _clipboard.read();
+    if (text != null) {
+      return _LinuxSnapshot(text, true);
+    }
+
+    final bool hasContent = await _clipboard.hasClipboardContent();
+    return _LinuxSnapshot(
+      null,
+      !hasContent,
+      containsUnsupportedData: hasContent,
+    );
   }
 
   @override
-  bool restoreClipboard(ClipboardSnapshotHandle snapshot) {
+  Future<bool> restoreClipboard(ClipboardSnapshotHandle snapshot) async {
     final _LinuxSnapshot s = snapshot as _LinuxSnapshot;
+    if (!s.canRestore || s.containsUnsupportedData) {
+      return false;
+    }
     return _clipboard.write(s.text ?? '');
   }
 
@@ -353,15 +373,17 @@ class LinuxInterop implements PlatformInterop {
   void disposeSnapshot(ClipboardSnapshotHandle snapshot) {}
 
   @override
-  void setForegroundLanguage({required bool persian}) {
+  Future<void> setForegroundLanguage({required bool persian}) async {
     final int display = _dpy;
     if (display == 0) {
       return;
     }
 
     try {
-      final ProcessResult result =
-          Process.runSync('setxkbmap', <String>['-query']);
+      final ProcessResult result = await Process.run(
+        'setxkbmap',
+        <String>['-query'],
+      ).timeout(const Duration(seconds: 2));
       if (result.exitCode != 0) {
         return;
       }

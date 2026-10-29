@@ -11,7 +11,7 @@ mkdir -p "$root/DEBIAN" "$root/opt/keyfix" "$root/usr/bin" "$root/usr/share/appl
 cp -r "$bundle"/. "$root/opt/keyfix/"
 ln -s /opt/keyfix/keyfix "$root/usr/bin/keyfix"
 cp ci/linux/keyfix.desktop "$root/usr/share/applications/keyfix.desktop"
-cp docs/logo.png "$root/usr/share/icons/hicolor/512x512/apps/keyfix.png"
+cp assets/icons/keyfix.png "$root/usr/share/icons/hicolor/512x512/apps/keyfix.png"
 
 cat > "$root/DEBIAN/control" <<CONTROL
 Package: keyfix
@@ -20,7 +20,7 @@ Section: utils
 Priority: optional
 Architecture: amd64
 Maintainer: KeyFix
-Depends: libgtk-3-0, libxkbcommon0, libx11-6, libxi6, libxtst6, libayatana-appindicator3-1, libnotify4, xclip | xsel | wl-clipboard
+Depends: libgtk-3-0, libxkbcommon0, libx11-6, libxi6, libxtst6, libayatana-appindicator3-1, libnotify4, x11-xkb-utils, xclip | xsel | wl-clipboard
 Description: Fix text typed in the wrong keyboard layout
  Select text typed with the wrong keyboard language and press a shortcut to convert it between Persian and English layouts.
 CONTROL

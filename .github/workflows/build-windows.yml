@@ -168,7 +168,7 @@ jobs:
           done
           icons=macos/Runner/Assets.xcassets/AppIcon.appiconset
           for size in 16 32 64 128 256 512 1024; do
-            sips -z $size $size docs/logo.png --out "$icons/app_icon_$size.png" >/dev/null
+            sips -z $size $size assets/icons/keyfix.png --out "$icons/app_icon_$size.png" >/dev/null
           done
 
       - run: flutter pub get
@@ -225,6 +225,7 @@ jobs:
           flutter create --platforms=linux --project-name keyfix --org app.keyfix .
           rm -f test/widget_test.dart
           sed -i 's/gboolean use_header_bar = TRUE;/gboolean use_header_bar = FALSE;/' linux/runner/my_application.cc
+          python3 ci/linux/patch_runner.py linux/runner/my_application.cc
 
       - run: flutter pub get
       - run: flutter analyze --no-fatal-infos --no-fatal-warnings

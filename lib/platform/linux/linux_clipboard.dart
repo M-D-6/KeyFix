@@ -1,6 +1,14 @@
+import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 enum _ClipboardTool { xclip, xsel, wayland }
+
+class _TextCommandResult {
+  const _TextCommandResult(this.output);
+
+  final String output;
+}
 
 class LinuxClipboard {
   LinuxClipboard._(this._tool);
@@ -24,7 +32,7 @@ class LinuxClipboard {
           ];
 
     for (final _ClipboardTool tool in order) {
-      if (_exists(_binary(tool))) {
+      if (_available(tool)) {
         return LinuxClipboard._(tool);
       }
     }
@@ -46,6 +54,13 @@ class LinuxClipboard {
     }
   }
 
+  static bool _available(_ClipboardTool tool) {
+    if (tool == _ClipboardTool.wayland) {
+      return _exists('wl-paste') && _exists('wl-copy');
+    }
+    return _exists(_binary(tool));
+  }
+
   static bool _exists(String name) {
     try {
       final ProcessResult result = Process.runSync(
@@ -58,10 +73,94 @@ class LinuxClipboard {
     }
   }
 
-  String? read({bool primary = false}) {
+  Future<_TextCommandResult?> _runTextCommand(
+    List<String> command, {
+    bool allowMalformed = true,
+  }) async {
+    Process? process;
+    try {
+      process = await Process.start(command.first, command.sublist(1));
+      final Future<String> output = process.stdout
+          .transform(Utf8Decoder(allowMalformed: allowMalformed))
+          .join();
+      final Future<void> errors = process.stderr.drain<void>();
+      final int exitCode = await process.exitCode.timeout(
+        const Duration(milliseconds: 900),
+        onTimeout: () {
+          process!.kill(ProcessSignal.sigkill);
+          return -1;
+        },
+      );
+      final String value = await output.timeout(
+        const Duration(milliseconds: 250),
+        onTimeout: () => '',
+      );
+      await errors.timeout(
+        const Duration(milliseconds: 250),
+        onTimeout: () {},
+      );
+      if (exitCode != 0) {
+        return null;
+      }
+      return _TextCommandResult(value);
+    } catch (_) {
+      process?.kill(ProcessSignal.sigkill);
+      return null;
+    }
+  }
+
+  List<String>? _readCommand({bool primary = false}) {
     final _ClipboardTool? tool = _tool;
     if (tool == null) {
       return null;
+    }
+
+    switch (tool) {
+      case _ClipboardTool.xclip:
+        return <String>[
+          'xclip',
+          '-o',
+          '-selection',
+          primary ? 'primary' : 'clipboard',
+          '-target',
+          'UTF8_STRING',
+        ];
+      case _ClipboardTool.xsel:
+        return <String>[
+          'xsel',
+          primary ? '--primary' : '--clipboard',
+          '--output',
+        ];
+      case _ClipboardTool.wayland:
+        return <String>[
+          'wl-paste',
+          '--no-newline',
+          '--type',
+          'text/plain',
+          if (primary) '--primary',
+        ];
+    }
+  }
+
+  Future<String?> read({bool primary = false}) async {
+    final List<String>? command = _readCommand(primary: primary);
+    if (command == null) {
+      return null;
+    }
+    final _TextCommandResult? result = await _runTextCommand(
+      command,
+      allowMalformed: _tool != _ClipboardTool.xsel,
+    );
+    if (result == null || result.output.contains('\u0000')) {
+      return null;
+    }
+    return result.output;
+  }
+
+  Future<bool> hasClipboardContent() async {
+    final _ClipboardTool? tool = _tool;
+    if (tool == null) {
+      return false;
     }
 
     final List<String> command;
@@ -71,69 +170,69 @@ class LinuxClipboard {
           'xclip',
           '-o',
           '-selection',
-          primary ? 'primary' : 'clipboard',
+          'clipboard',
+          '-target',
+          'TARGETS',
         ];
       case _ClipboardTool.xsel:
-        command = <String>[
-          'xsel',
-          primary ? '--primary' : '--clipboard',
-          '--output',
-        ];
+        command = <String>['xsel', '--clipboard', '--output'];
       case _ClipboardTool.wayland:
-        command = <String>[
-          'wl-paste',
-          '--no-newline',
-          if (primary) '--primary',
-        ];
+        command = <String>['wl-paste', '--list-types'];
     }
 
-    try {
-      final ProcessResult result = _run(command);
-      if (result.exitCode != 0) {
-        return null;
-      }
-      final Object? out = result.stdout;
-      if (out is! String || out.isEmpty) {
-        return null;
-      }
-      return out;
-    } catch (_) {
-      return null;
-    }
+    final _TextCommandResult? result = await _runTextCommand(command);
+    return result != null && result.output.trim().isNotEmpty;
   }
 
-  bool write(String text) {
+  Future<bool> write(String text) async {
     final _ClipboardTool? tool = _tool;
     if (tool == null) {
       return false;
     }
 
-    final String pipe;
+    final List<String> command;
     switch (tool) {
       case _ClipboardTool.xclip:
-        pipe = 'xclip -selection clipboard -i';
+        command = <String>['xclip', '-selection', 'clipboard', '-i'];
       case _ClipboardTool.xsel:
-        pipe = 'xsel --clipboard --input';
+        command = <String>['xsel', '--clipboard', '--input'];
       case _ClipboardTool.wayland:
-        pipe = 'wl-copy';
+        command = <String>['wl-copy', '--type', 'text/plain;charset=utf-8'];
     }
 
+    Process? process;
     try {
-      final ProcessResult result = Process.runSync(
-        'sh',
-        <String>['-c', 'printf %s "\$1" | $pipe >/dev/null 2>&1', 'sh', text],
+      process = await Process.start(command.first, command.sublist(1));
+      if (tool == _ClipboardTool.wayland) {
+        process.stdout.listen((_) {});
+        process.stderr.listen((_) {});
+      }
+      process.stdin.add(utf8.encode(text));
+      await process.stdin.close();
+
+      if (tool == _ClipboardTool.wayland) {
+        try {
+          return await process.exitCode.timeout(
+            const Duration(milliseconds: 250),
+          ) == 0;
+        } on TimeoutException {
+          return true;
+        }
+      }
+
+      final int exitCode = await process.exitCode.timeout(
+        const Duration(milliseconds: 900),
+        onTimeout: () {
+          process!.kill(ProcessSignal.sigkill);
+          return -1;
+        },
       );
-      return result.exitCode == 0;
+      return exitCode == 0;
     } catch (_) {
+      if (_tool != _ClipboardTool.wayland) {
+        process?.kill(ProcessSignal.sigkill);
+      }
       return false;
-    }
-  }
-
-  static ProcessResult _run(List<String> command) {
-    try {
-      return Process.runSync('timeout', <String>['1', ...command]);
-    } on ProcessException {
-      return Process.runSync(command.first, command.sublist(1));
     }
   }
 }

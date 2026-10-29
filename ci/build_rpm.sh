@@ -19,7 +19,7 @@ Release: 1
 Summary: Fix text typed in the wrong keyboard layout
 License: GPL-3.0-only
 BuildArch: x86_64
-Requires: gtk3, libxkbcommon, libX11, libXi, libXtst, libayatana-appindicator-gtk3, libnotify, (xclip or xsel or wl-clipboard)
+Requires: gtk3, libxkbcommon, libX11, libXi, libXtst, libayatana-appindicator-gtk3, libnotify, xorg-x11-xkb-utils, (xclip or xsel or wl-clipboard)
 
 %description
 Select text typed with the wrong keyboard language and press a shortcut to convert it between Persian and English layouts.
@@ -29,7 +29,7 @@ mkdir -p %{buildroot}/opt/keyfix %{buildroot}/usr/bin %{buildroot}/usr/share/app
 cp -r $bundle/. %{buildroot}/opt/keyfix/
 ln -s /opt/keyfix/keyfix %{buildroot}/usr/bin/keyfix
 cp $PWD/ci/linux/keyfix.desktop %{buildroot}/usr/share/applications/keyfix.desktop
-cp $PWD/docs/logo.png %{buildroot}/usr/share/icons/hicolor/512x512/apps/keyfix.png
+cp $PWD/assets/icons/keyfix.png %{buildroot}/usr/share/icons/hicolor/512x512/apps/keyfix.png
 
 %files
 /opt/keyfix

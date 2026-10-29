@@ -54,10 +54,10 @@ Future<void> main(List<String> args) async {
   );
 
   await windowManager.waitUntilReadyToShow(options, () async {
-    if (!startedFromStartup) {
-      await controller.showMainWindow();
-    } else if (!Platform.isWindows) {
+    if (startedFromStartup && controller.canRunInBackground) {
       await controller.hideMainWindow();
+    } else {
+      await controller.showMainWindow();
     }
   });
 

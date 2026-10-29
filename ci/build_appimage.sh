@@ -8,9 +8,9 @@ dir="$(mktemp -d)/KeyFix.AppDir"
 mkdir -p "$dir/usr/bin"
 cp -r "$bundle"/. "$dir/usr/bin/"
 
-cp docs/logo.png "$dir/keyfix.png"
+cp assets/icons/keyfix.png "$dir/keyfix.png"
 cp ci/linux/keyfix.desktop "$dir/keyfix.desktop"
-sed -i 's#^Exec=.*#Exec=keyfix#' "$dir/keyfix.desktop"
+sed -i 's#^Exec=.*#Exec=AppRun#' "$dir/keyfix.desktop"
 
 cat > "$dir/AppRun" <<'RUN'
 #!/bin/sh

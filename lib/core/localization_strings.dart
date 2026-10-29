@@ -161,6 +161,8 @@ const Map<String, String> kEnglishStrings = <String, String>{
       'The xkb "us" and "ir" layouts could not be loaded. Install libxkbcommon and xkb-data.',
   'LinuxWaylandLimited':
       'This is a Wayland session. The global shortcut and key injection work only for X11 applications. Log in with an X11 session for full support.',
+  'LinuxTrayHostUnavailable':
+      'The GNOME AppIndicator extension is required for background mode. KeyFix will remain visible until a tray host is available.',
   'LinuxNoDisplay':
       'No X11 display is available, so the shortcut cannot be registered.',
 };
@@ -326,6 +328,8 @@ const Map<String, String> kPersianStrings = <String, String>{
       'چیدمان‌های xkb با نام us و ir بارگذاری نشد. libxkbcommon و xkb-data را نصب کنید.',
   'LinuxWaylandLimited':
       'نشست فعلی Wayland است. میانبر سراسری و ارسال کلید فقط برای برنامه‌های X11 کار می‌کند. برای پشتیبانی کامل با نشست X11 وارد شوید.',
+  'LinuxTrayHostUnavailable':
+      'برای اجرای پس‌زمینه در GNOME باید افزونهٔ AppIndicator فعال باشد. تا در دسترس بودن سینی اعلان‌ها، پنجرهٔ KeyFix پنهان نمی‌شود.',
   'LinuxNoDisplay':
       'هیچ نمایشگر X11 در دسترس نیست و میانبر ثبت نمی‌شود.',
 };

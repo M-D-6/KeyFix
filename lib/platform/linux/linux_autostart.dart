@@ -10,12 +10,25 @@ class LinuxAutoStart implements AutoStart {
     return '$base/autostart/keyfix.desktop';
   }
 
+  static String _escapeExecArgument(String value) {
+    return value
+        .replaceAll('\\', '\\\\')
+        .replaceAll('"', '\\"')
+        .replaceAll('%', '%%');
+  }
+
   static String get _content {
-    final String exe = File(Platform.resolvedExecutable).absolute.path;
+    final Map<String, String> env = Platform.environment;
+    final String? appImage = env['APPIMAGE'];
+    final String executable = appImage != null && appImage.trim().isNotEmpty
+        ? appImage
+        : File(Platform.resolvedExecutable).absolute.path;
+    final String escaped = _escapeExecArgument(executable);
     return '[Desktop Entry]\n'
         'Type=Application\n'
         'Name=KeyFix\n'
-        'Exec="$exe" --startup\n'
+        'Exec="$escaped" --startup\n'
+        'Icon=keyfix\n'
         'Terminal=false\n'
         'X-GNOME-Autostart-enabled=true\n';
   }
@@ -52,7 +65,10 @@ class LinuxAutoStart implements AutoStart {
     try {
       final File file = File(_path);
       if (file.existsSync()) {
-        file.writeAsStringSync(_content);
+        final String content = _content;
+        if (file.readAsStringSync() != content) {
+          file.writeAsStringSync(content);
+        }
       }
     } catch (_) {}
   }

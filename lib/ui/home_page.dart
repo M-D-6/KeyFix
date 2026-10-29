@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -21,24 +22,30 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final ScrollController _scrollController = ScrollController();
+
   AppController get c => widget.controller;
   ShortcutRecorder get r => c.recorder;
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ListenableBuilder(
-      listenable: Listenable.merge(<Listenable>[c, r]),
-      builder: (BuildContext context, _) {
-        return Stack(
-          children: <Widget>[
-            Positioned.fill(
-              top: 32,
-              child: _buildScrollBody(context),
-            ),
-            _buildTitleBar(context),
-          ],
-        );
-      },
+    return Stack(
+      children: <Widget>[
+        Positioned.fill(
+          top: 32,
+          child: ListenableBuilder(
+            listenable: Listenable.merge(<Listenable>[c, r]),
+            builder: (BuildContext context, _) => _buildScrollBody(context),
+          ),
+        ),
+        _buildTitleBar(context),
+      ],
     );
   }
 
@@ -98,27 +105,40 @@ class _HomePageState extends State<HomePage> {
   Widget _buildScrollBody(BuildContext context) {
     final bool fa = c.isPersian;
 
-    return SingleChildScrollView(
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 720),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 28),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: <Widget>[
-                _buildHero(context, fa),
-                const SizedBox(height: 14),
-                _buildShortcutCard(context, fa),
-                const SizedBox(height: 14),
-                _buildExecutionCard(context, fa),
-                const SizedBox(height: 14),
-                _buildConversionCard(context, fa),
-                const SizedBox(height: 14),
-                _buildStatusCard(context, fa),
-                const SizedBox(height: 18),
-                _buildAbout(context, fa),
-              ],
+    return ScrollConfiguration(
+      behavior: const _KeyFixDesktopScrollBehavior(),
+      child: Scrollbar(
+        controller: _scrollController,
+        thumbVisibility: true,
+        interactive: true,
+        thickness: 6,
+        radius: const Radius.circular(8),
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          primary: false,
+          physics: const ClampingScrollPhysics(),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 720),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 28),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: <Widget>[
+                    _buildHero(context, fa),
+                    const SizedBox(height: 14),
+                    _buildShortcutCard(context, fa),
+                    const SizedBox(height: 14),
+                    _buildExecutionCard(context, fa),
+                    const SizedBox(height: 14),
+                    _buildConversionCard(context, fa),
+                    const SizedBox(height: 14),
+                    _buildStatusCard(context, fa),
+                    const SizedBox(height: 18),
+                    _buildAbout(context, fa),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -546,4 +566,18 @@ class _HomePageState extends State<HomePage> {
       ],
     );
   }
+}
+
+
+class _KeyFixDesktopScrollBehavior extends MaterialScrollBehavior {
+  const _KeyFixDesktopScrollBehavior();
+
+  @override
+  Set<PointerDeviceKind> get dragDevices => <PointerDeviceKind>{
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.touch,
+        PointerDeviceKind.trackpad,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.invertedStylus,
+      };
 }

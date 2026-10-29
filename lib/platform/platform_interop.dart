@@ -1,8 +1,12 @@
+import 'dart:async';
+
 import '../core/keyboard_layout_map.dart';
 import '../core/shortcut_definition.dart';
 
 abstract class ClipboardSnapshotHandle {
   bool get canRestore;
+
+  bool get containsUnsupportedData => false;
 }
 
 abstract class PlatformInterop {
@@ -19,19 +23,19 @@ abstract class PlatformInterop {
 
   bool areShortcutKeysDown(ShortcutDefinition shortcut);
 
-  String? readSelectionDirect();
+  FutureOr<String?> readSelectionDirect();
 
   bool sendCopy();
   bool sendPaste();
 
-  int clipboardSequenceNumber();
+  FutureOr<int> clipboardSequenceNumber();
 
-  String? getClipboardText();
-  bool setClipboardText(String text);
+  FutureOr<String?> getClipboardText();
+  FutureOr<bool> setClipboardText(String text);
 
-  ClipboardSnapshotHandle saveClipboard();
-  bool restoreClipboard(ClipboardSnapshotHandle snapshot);
+  FutureOr<ClipboardSnapshotHandle> saveClipboard();
+  FutureOr<bool> restoreClipboard(ClipboardSnapshotHandle snapshot);
   void disposeSnapshot(ClipboardSnapshotHandle snapshot);
 
-  void setForegroundLanguage({required bool persian});
+  FutureOr<void> setForegroundLanguage({required bool persian});
 }

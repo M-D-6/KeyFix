@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:local_notifier/local_notifier.dart';
 import 'package:tray_manager/tray_manager.dart';
 import 'package:window_manager/window_manager.dart';
@@ -142,6 +144,9 @@ class AppController extends ChangeNotifier
     await windowManager.setPreventClose(true);
 
     trayManager.addListener(this);
+    if (Platform.isLinux) {
+      _linuxTrayHostAvailable = await _detectLinuxTrayHost();
+    }
     await _applyTray();
 
     _autoStart.refreshCurrentPath();
@@ -274,9 +279,16 @@ class AppController extends ChangeNotifier
   }
 
   void _updateStatusForEnabledState() {
-    final String? problem = _os.setupProblemKey;
     final String base = enabled ? L('EnabledStatus') : L('DisabledStatus');
-    _statusText = problem == null ? base : '$base\n\n${L(problem)}';
+    final List<String> issues = <String>[];
+    final String? problem = _os.setupProblemKey;
+    if (problem != null) {
+      issues.add(L(problem));
+    }
+    if (Platform.isLinux && !_linuxTrayHostAvailable) {
+      issues.add(L('LinuxTrayHostUnavailable'));
+    }
+    _statusText = issues.isEmpty ? base : '$base\n\n${issues.join('\n\n')}';
     notifyListeners();
   }
 
@@ -508,6 +520,69 @@ class AppController extends ChangeNotifier
   }
 
   bool _trayCreated = false;
+  bool _trayReady = false;
+  bool _linuxTrayHostAvailable = true;
+
+  bool get canRunInBackground => settings.keepRunningInBackground &&
+      settings.showTrayIcon &&
+      _trayReady &&
+      _linuxTrayHostAvailable;
+
+  Future<bool> _detectLinuxTrayHost() async {
+    final String desktop =
+        (Platform.environment['XDG_CURRENT_DESKTOP'] ?? '').toLowerCase();
+    if (!desktop.contains('gnome')) {
+      return true;
+    }
+
+    try {
+      final ProcessResult result = await Process.run(
+        'gnome-extensions',
+        <String>['list', '--enabled'],
+      ).timeout(const Duration(seconds: 2));
+      if (result.exitCode != 0) {
+        return false;
+      }
+      final String enabled = result.stdout.toString().toLowerCase();
+      return enabled.contains('appindicatorsupport@rgcjonas.gmail.com') ||
+          enabled.contains('ubuntu-appindicators@ubuntu.com');
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<String> _trayIconPath() async {
+    if (Platform.isWindows) {
+      return 'assets/KeyFix.ico';
+    }
+
+    final String home =
+        Platform.environment['HOME'] ?? Directory.systemTemp.path;
+    final String cacheHome =
+        Platform.environment['XDG_CACHE_HOME'] ?? '$home/.cache';
+    final String base = Platform.isMacOS
+        ? '$home/Library/Application Support/KeyFix'
+        : '$cacheHome/keyfix';
+    final File icon = File('$base${Platform.pathSeparator}tray-icon.png');
+    final ByteData data = await rootBundle.load('assets/icons/keyfix.png');
+    final Uint8List bytes = data.buffer.asUint8List(
+      data.offsetInBytes,
+      data.lengthInBytes,
+    );
+
+    try {
+      await icon.parent.create(recursive: true);
+      await icon.writeAsBytes(bytes, flush: true);
+      return icon.absolute.path;
+    } catch (_) {
+      final Directory fallback = Directory.systemTemp;
+      final File fallbackIcon = File(
+        '${fallback.path}${Platform.pathSeparator}keyfix-tray-icon.png',
+      );
+      await fallbackIcon.writeAsBytes(bytes, flush: true);
+      return fallbackIcon.absolute.path;
+    }
+  }
 
   Future<void> _applyTray() async {
     try {
@@ -516,13 +591,12 @@ class AppController extends ChangeNotifier
           await trayManager.destroy();
           _trayCreated = false;
         }
+        _trayReady = false;
         return;
       }
 
       if (!_trayCreated) {
-        await trayManager.setIcon(
-          Platform.isWindows ? 'assets/KeyFix.ico' : 'assets/title/KeyFix.png',
-        );
+        await trayManager.setIcon(await _trayIconPath());
         await trayManager.setToolTip('KeyFix');
         _trayCreated = true;
       }
@@ -543,7 +617,9 @@ class AppController extends ChangeNotifier
           ],
         ),
       );
+      _trayReady = true;
     } catch (e) {
+      _trayReady = false;
       debugPrint('KeyFix: tray error: $e');
     }
   }
@@ -659,7 +735,7 @@ class AppController extends ChangeNotifier
       return;
     }
 
-    if (!settings.keepRunningInBackground) {
+    if (!canRunInBackground) {
       exitApplication();
       return;
     }

@@ -28,6 +28,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/KeyFix.ico
+    - assets/icons/keyfix.png
     - assets/title/KeyFix.png
   fonts:
     - family: Vazirmatn

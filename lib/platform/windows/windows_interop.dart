@@ -29,6 +29,9 @@ class _WindowsSnapshot implements ClipboardSnapshotHandle {
 
   @override
   final bool canRestore;
+
+  @override
+  bool get containsUnsupportedData => !canRestore && !wasEmpty;
 }
 
 class WindowsInterop implements PlatformInterop {

@@ -61,26 +61,29 @@ class SelectionConverter {
         return ConversionResult.focusChanged;
       }
 
-      snapshot = _os.saveClipboard();
+      snapshot = await _os.saveClipboard();
+      if (snapshot.containsUnsupportedData) {
+        return ConversionResult.clipboardError;
+      }
 
       if (!_stillForeground(target)) {
         return ConversionResult.focusChanged;
       }
 
-      String? selectedText = _os.readSelectionDirect();
+      String? selectedText = await _os.readSelectionDirect();
 
       if (selectedText == null) {
         String? sentinel;
 
-        if (_os.needsCopySentinel) {
+        if (_os.needsCopySentinel && snapshot.canRestore) {
           sentinel = '\u200B${DateTime.now().microsecondsSinceEpoch}';
           clipboardDirty = true;
-          if (!_os.setClipboardText(sentinel)) {
+          if (!await _os.setClipboardText(sentinel)) {
             return ConversionResult.clipboardError;
           }
         }
 
-        final int sequenceBeforeCopy = _os.clipboardSequenceNumber();
+        final int sequenceBeforeCopy = await _os.clipboardSequenceNumber();
 
         if (!_stillForeground(target) || !_os.sendCopy()) {
           return ConversionResult.inputInjectionFailed;
@@ -129,7 +132,7 @@ class SelectionConverter {
         return ConversionResult.clipboardError;
       }
 
-      final int sequenceAfterOurSet = _os.clipboardSequenceNumber();
+      final int sequenceAfterOurSet = await _os.clipboardSequenceNumber();
 
       if (!_stillForeground(target) || !_os.sendPaste()) {
         return ConversionResult.inputInjectionFailed;
@@ -138,12 +141,12 @@ class SelectionConverter {
       await _delay(Platform.isWindows ? 80 : 200);
 
       if (_stillForeground(target) &&
-          _os.clipboardSequenceNumber() != sequenceAfterOurSet) {
+          (await _os.clipboardSequenceNumber()) != sequenceAfterOurSet) {
         clipboardDirty = false;
       }
 
       if (autoSwitchKeyboardLanguage && _stillForeground(target)) {
-        _setKeyboardLanguageFromLastLetter(target, converted);
+        await _setKeyboardLanguageFromLastLetter(target, converted);
       }
 
       return ConversionResult.success;
@@ -153,7 +156,7 @@ class SelectionConverter {
       if (snapshot != null) {
         if (clipboardDirty && snapshot.canRestore) {
           try {
-            _os.restoreClipboard(snapshot);
+            await _os.restoreClipboard(snapshot);
           } catch (_) {}
         }
         _os.disposeSnapshot(snapshot);
@@ -162,7 +165,7 @@ class SelectionConverter {
     }
   }
 
-  void _setKeyboardLanguageFromLastLetter(int target, String text) {
+  Future<void> _setKeyboardLanguageFromLastLetter(int target, String text) async {
     if (target == 0 || text.isEmpty) {
       return;
     }
@@ -175,12 +178,12 @@ class SelectionConverter {
       final int unit = text.codeUnitAt(i);
 
       if (KeyboardConverter.isPersianCharacter(unit)) {
-        _os.setForegroundLanguage(persian: true);
+        await _os.setForegroundLanguage(persian: true);
         return;
       }
 
       if (KeyboardConverter.isEnglishLetter(unit)) {
-        _os.setForegroundLanguage(persian: false);
+        await _os.setForegroundLanguage(persian: false);
         return;
       }
     }
@@ -221,7 +224,7 @@ class SelectionConverter {
         return _ClipboardWait.focusChanged;
       }
 
-      if (_os.clipboardSequenceNumber() != previousSequence) {
+      if ((await _os.clipboardSequenceNumber()) != previousSequence) {
         return _ClipboardWait.changed;
       }
 
@@ -245,7 +248,7 @@ class SelectionConverter {
         return null;
       }
 
-      final String? text = _os.getClipboardText();
+      final String? text = await _os.getClipboardText();
       if (text != null && text.isNotEmpty) {
         return text;
       }
@@ -270,7 +273,7 @@ class SelectionConverter {
         return false;
       }
 
-      if (_os.setClipboardText(text)) {
+      if (await _os.setClipboardText(text)) {
         return true;
       }
 

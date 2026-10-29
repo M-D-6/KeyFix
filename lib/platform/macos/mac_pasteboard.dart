@@ -11,12 +11,19 @@ const String _transientType = 'org.nspasteboard.TransientType';
 const int _snapshotLimit = 32 * 1024 * 1024;
 
 class MacPasteboardSnapshot implements ClipboardSnapshotHandle {
-  MacPasteboardSnapshot(this.items, this.canRestore);
+  MacPasteboardSnapshot(
+    this.items,
+    this.canRestore, {
+    this.containsUnsupportedData = false,
+  });
 
   final List<Map<String, Uint8List>> items;
 
   @override
   final bool canRestore;
+
+  @override
+  final bool containsUnsupportedData;
 }
 
 int _general() => msg0(objcClass('NSPasteboard'), objcSel('generalPasteboard'));
@@ -70,6 +77,9 @@ class MacPasteboard {
       }
 
       int total = 0;
+      bool complete = true;
+      bool hasRestorableText = false;
+      bool oversizedData = false;
       final int items = msg0(pb, objcSel('pasteboardItems'));
       final int count = items == 0 ? 0 : msg0(items, objcSel('count'));
 
@@ -82,17 +92,25 @@ class MacPasteboard {
         for (int t = 0; t < typeCount; t++) {
           final String? type =
               dartStringFromNs(msg1(types, objcSel('objectAtIndex:'), t));
-          if (type == null || type.startsWith('dyn.')) {
+          if (type == null) {
+            complete = false;
+            continue;
+          }
+          if (type.startsWith('dyn.')) {
+            complete = false;
             continue;
           }
 
           final int data = msg1(item, objcSel('dataForType:'), nsString(type));
           if (data == 0) {
+            complete = false;
             continue;
           }
 
           final int length = msg0(data, objcSel('length'));
           if (length < 0 || total + length > _snapshotLimit) {
+            complete = false;
+            oversizedData = true;
             continue;
           }
 
@@ -104,6 +122,11 @@ class MacPasteboard {
               Pointer<Uint8>.fromAddress(bytes).asTypedList(length),
             );
           }
+          if (type == _textType ||
+              type == 'public.text' ||
+              type == 'NSStringPboardType') {
+            hasRestorableText = true;
+          }
           total += length;
         }
 
@@ -112,11 +135,21 @@ class MacPasteboard {
         }
       }
 
-      return MacPasteboardSnapshot(result, true);
+      final bool unsupported = count > 0 &&
+          (!hasRestorableText || oversizedData) &&
+          !complete;
+      return MacPasteboardSnapshot(
+        result,
+        complete || (hasRestorableText && !oversizedData),
+        containsUnsupportedData: unsupported,
+      );
     });
   }
 
   static bool restore(MacPasteboardSnapshot snapshot) {
+    if (!snapshot.canRestore) {
+      return false;
+    }
     return withAutoreleasePool<bool>(() {
       final int pb = _general();
       if (pb == 0) {

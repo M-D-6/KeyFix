@@ -75,12 +75,13 @@ KeyFix متن انتخاب‌شده را با ارسال `Ctrl+C` (در macOS `C
 
 **macOS:** برنامه با امضای محلی (ad-hoc) و بدون Apple Developer ID منتشر می‌شود؛ بار اول روی آن راست‌کلیک و **Open** را بزنید (یا در Terminal دستور `xattr -dr com.apple.quarantine /Applications/KeyFix.app` را اجرا کنید). برای تشخیص میانبر سراسری باید در System Settings › Privacy & Security › Accessibility اجازه بدهید؛ پس از دادن اجازه برنامه خودکار فعال می‌شود. چیدمان‌های ABC (یا US) و Persian باید در Input Sources اضافه باشند. با هر نسخهٔ جدید ممکن است لازم باشد این اجازه را دوباره بدهید.
 
-**Linux:** پشتیبانی کامل برای نشست **X11** است. به یکی از `xclip` یا `xsel` (یا `wl-clipboard`) نیاز دارد. در Wayland میانبر سراسری و ارسال کلید فقط برای برنامه‌های X11 (XWayland) کار می‌کند. برای نمایش آیکون در سینی، افزونهٔ AppIndicator (در GNOME) لازم است.
+**Linux:** پشتیبانی کامل برای نشست **X11** است. به یکی از `xclip` یا `xsel` (یا `wl-clipboard`) و بستهٔ `x11-xkb-utils` برای تغییر چیدمان صفحه‌کلید نیاز دارد. در Wayland میانبر سراسری و ارسال کلید فقط برای برنامه‌های X11 (XWayland) کار می‌کند. برای نمایش آیکون در سینی، افزونهٔ AppIndicator (در GNOME) لازم است؛ اگر سینی قابل‌استفاده نباشد، برنامه برای جلوگیری از مخفی‌شدن غیرقابل‌دسترسی، پنجره را باز نگه می‌دارد. اگر محتوای کلیپ‌بورد با اطمینان قابل‌بازیابی نباشد، تبدیل متوقف می‌شود تا دادهٔ قبلی از دست نرود.
 
 ### ⚠️ محدودیت‌ها
 
 - KeyFix با دسترسی معمولی کاربر اجرا می‌شود؛ بنابراین ممکن است نتواند در پنجره‌هایی که **به‌صورت Administrator** اجرا شده‌اند متن را تبدیل کند (محدودیت امنیتی ویندوز).
 - اگر میانبر انتخابی را سیستم‌عامل یا برنامهٔ دیگری استفاده کند، ثبت آن ممکن است شکست بخورد؛ میانبر دیگری انتخاب کنید.
+- اگر کلیپ‌بورد شامل داده‌ای باشد که در Linux یا macOS قابل‌بازیابی مطمئن نیست، برنامه برای جلوگیری از حذف آن، تبدیل را انجام نمی‌دهد.
 - در Linux زیر Wayland فقط برنامه‌های X11 پشتیبانی می‌شوند؛ در macOS بدون اجازهٔ Accessibility میانبر کار نمی‌کند.
 - نسخه‌های macOS و Linux تازه اضافه شده‌اند و ممکن است هنوز مشکلاتی داشته باشند؛ گزارش خطا کمک می‌کند.
 
@@ -115,7 +116,7 @@ iscc KeyFix.iss
 
 خروجی نصب‌کننده در `Output\KeyFix-Setup-x64.exe` قرار می‌گیرد. برای ARM64 پیش از اجرا مقدار `$env:KEYFIX_ARCH = 'arm64'` را تنظیم کنید.
 
-ساخت برای macOS و Linux: ابتدا یک‌بار `flutter create --platforms=macos,linux --project-name keyfix .` را اجرا کنید و فایل‌های پوشهٔ `ci` را مانند workflow در `.github/workflows` روی پروژهٔ تولیدشده اعمال کنید (برای Linux بسته‌های `libgtk-3-dev`، `libayatana-appindicator3-dev` و `libnotify-dev` لازم است)، سپس `flutter build macos --release` یا `flutter build linux --release`.
+ساخت برای macOS و Linux: ابتدا یک‌بار `flutter create --platforms=macos,linux --project-name keyfix .` را اجرا کنید و فایل‌های پوشهٔ `ci` را مانند workflow در `.github/workflows` روی پروژهٔ تولیدشده اعمال کنید (برای Linux بسته‌های `libgtk-3-dev`، `libayatana-appindicator3-dev`، `libnotify-dev` و `libxkbcommon-dev` لازم است)، سپس `flutter build macos --release` یا `flutter build linux --release`.
 
 ### 🧩 ساختار کد
 
@@ -188,12 +189,13 @@ For macOS download `KeyFix-macos.dmg` (or `KeyFix-macos.zip`); for Linux downloa
 
 **macOS:** the app is ad-hoc signed without an Apple Developer ID, so the first time right-click it and choose **Open** (or run `xattr -dr com.apple.quarantine /Applications/KeyFix.app`). Detecting the global shortcut requires permission in System Settings › Privacy & Security › Accessibility; KeyFix starts working automatically once it is granted. The ABC (or US) and Persian layouts must be added under Input Sources. The permission may need to be granted again after an update.
 
-**Linux:** full support is for **X11** sessions. It needs `xclip` or `xsel` (or `wl-clipboard`). On Wayland the global shortcut and key injection work only for X11 (XWayland) applications. The tray icon needs an AppIndicator extension on GNOME.
+**Linux:** full support is for **X11** sessions. It needs `xclip` or `xsel` (or `wl-clipboard`) and `x11-xkb-utils` for keyboard layout switching. On Wayland the global shortcut and key injection work only for X11 (XWayland) applications. The tray icon needs an AppIndicator extension on GNOME; if a usable tray host is unavailable, KeyFix keeps its window visible instead of hiding an inaccessible background process. If existing clipboard data cannot be safely restored, conversion is stopped to avoid losing that data.
 
 ### ⚠️ Limitations
 
 - KeyFix runs with normal user privileges, so it may not convert text in windows running **as Administrator** (a Windows security restriction).
 - If the selected shortcut is reserved by the system or another app, registration may fail; choose a different combination.
+- If clipboard data cannot be safely restored on Linux or macOS, conversion is skipped to prevent losing the previous clipboard contents.
 - On Linux under Wayland only X11 applications are supported; on macOS the shortcut does not work without the Accessibility permission.
 - The macOS and Linux builds are new and may still have rough edges; bug reports are welcome.
 
@@ -228,7 +230,7 @@ iscc KeyFix.iss
 
 The installer is written to `Output\KeyFix-Setup-x64.exe`. On ARM64, set `$env:KEYFIX_ARCH = 'arm64'` first.
 
-Building for macOS and Linux: run `flutter create --platforms=macos,linux --project-name keyfix .` once and apply the files in `ci` to the generated projects as the workflow in `.github/workflows` does (Linux needs `libgtk-3-dev`, `libayatana-appindicator3-dev` and `libnotify-dev`), then run `flutter build macos --release` or `flutter build linux --release`.
+Building for macOS and Linux: run `flutter create --platforms=macos,linux --project-name keyfix .` once and apply the files in `ci` to the generated projects as the workflow in `.github/workflows` does (Linux needs `libgtk-3-dev`, `libayatana-appindicator3-dev`, `libnotify-dev` and `libxkbcommon-dev`), then run `flutter build macos --release` or `flutter build linux --release`.
 
 ### 🧩 Code layout
 
