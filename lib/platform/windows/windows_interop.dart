@@ -54,18 +54,6 @@ class WindowsInterop implements PlatformInterop {
   KeyTranslator get persianTranslator => _persian.translate;
 
   @override
-  int get pollIntervalMs => 5;
-
-  @override
-  bool get needsCopySentinel => false;
-
-  @override
-  String? get setupProblemKey => null;
-
-  @override
-  String? readSelectionDirect() => null;
-
-  @override
   int foregroundWindow() => w.GetForegroundWindow();
 
   static bool _isKeyDown(int virtualKey) {

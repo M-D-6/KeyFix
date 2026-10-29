@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:ffi/ffi.dart';
 
-import '../autostart.dart';
 import 'win32.dart' as w;
 
 class WindowsRegistry {
@@ -214,7 +213,7 @@ class WindowsRegistry {
   }
 }
 
-class AutoStartManager implements AutoStart {
+class AutoStartManager {
   static const String _registryPath =
       r'Software\Microsoft\Windows\CurrentVersion\Run';
   static const String _valueName = 'KeyFix';
@@ -225,7 +224,6 @@ class AutoStartManager implements AutoStart {
     return '"$full" $startupArgument';
   }
 
-  @override
   bool isEnabled() {
     try {
       final String? command = WindowsRegistry.readString(
@@ -243,7 +241,6 @@ class AutoStartManager implements AutoStart {
     }
   }
 
-  @override
   bool setEnabled(bool enabled) {
     try {
       if (!enabled) {
@@ -260,7 +257,6 @@ class AutoStartManager implements AutoStart {
     }
   }
 
-  @override
   void refreshCurrentPath() {
     try {
       final String? existing = WindowsRegistry.readString(

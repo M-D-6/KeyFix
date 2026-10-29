@@ -10,5 +10,5 @@ windows/flutter/ephemeral/
 .vscode/
 *.iml
 Output/
-macos/
-linux/
+
+# Do not add unanchored linux/ or macos/ patterns: they can hide Dart sources under lib/platform.

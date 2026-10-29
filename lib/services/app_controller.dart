@@ -14,13 +14,9 @@ import '../core/settings_manager.dart';
 import '../core/shortcut_definition.dart';
 import '../core/app_log.dart';
 import '../core/keyboard_layout_map.dart';
-import '../platform/autostart.dart';
-import '../platform/isolate_hook.dart';
-import '../platform/platform_interop.dart';
-import '../platform/platform_services.dart' as services;
-import '../platform/shortcut_hook.dart';
 import '../platform/windows/keyboard_hook.dart';
 import '../platform/windows/memory_trimmer.dart';
+import '../platform/windows/windows_interop.dart';
 import '../platform/windows/windows_registry.dart';
 import 'selection_converter.dart';
 import 'shortcut_recorder.dart';
@@ -40,12 +36,12 @@ class AppController extends ChangeNotifier
 
   final ShortcutRecorder recorder = ShortcutRecorder();
 
-  late final PlatformInterop _os;
+  late final WindowsInterop _os;
   late final KeyboardConverter _keyboardConverter;
   late final SelectionConverter _selectionConverter;
-  final AutoStart _autoStart = createAutoStart();
+  final AutoStartManager _autoStart = AutoStartManager();
 
-  ShortcutHook? _hook;
+  KeyboardHook? _hook;
   StreamSubscription<void>? _hookSub;
   bool _hookBusy = false;
   bool _hookDirty = false;
@@ -60,8 +56,6 @@ class AppController extends ChangeNotifier
   bool _windowHidden = false;
   Timer? _trimTimer;
   Timer? _trimLoop;
-  Timer? _blurTimer;
-  Timer? _permissionTimer;
 
   String _statusText = '';
   int _hotkeyErrorCode = 0;
@@ -97,18 +91,14 @@ class AppController extends ChangeNotifier
     _currentShortcut = settingsManager.getShortcut();
 
     KeyboardHook.onLog = AppLog.write;
-    IsolateShortcutHook.onLog = AppLog.write;
     AppLog.write('--- KeyFix starting (background: $backgroundMode) ---');
 
-    if (Platform.isMacOS && !services.accessibilityTrusted()) {
-      services.promptAccessibility();
-    }
+    _os = WindowsInterop();
 
-    _os = services.createInterop();
-
-    final String? problem = _os.setupProblemKey;
-    if (problem != null) {
-      AppLog.write('Setup problem: $problem');
+    if (!_os.layoutsAvailable) {
+      AppLog.write('WARNING: Windows could not load the English/Persian '
+          'keyboard layouts (HKL en=${_os.englishTranslatorLayout}, '
+          'fa=${_os.persianTranslatorLayout})');
     }
 
     _keyboardConverter = KeyboardConverter(
@@ -156,47 +146,9 @@ class AppController extends ChangeNotifier
       _setWindowHidden(true);
     }
 
-    if (_hook == null) {
-      _watchPermission();
-      if (!backgroundMode) {
-        _showLocalizedError(_hookErrorKey(_hotkeyErrorCode), _hotkeyErrorCode);
-      }
+    if (!backgroundMode && _hook == null) {
+      _showLocalizedError('HotkeyRegistrationFailed', _hotkeyErrorCode);
     }
-  }
-
-  String _hookErrorKey(int code) {
-    switch (code) {
-      case kHookPermissionDenied:
-        return 'MacPermissionNeeded';
-      case kHookNoDisplay:
-        return 'LinuxNoDisplay';
-      default:
-        return 'HotkeyRegistrationFailed';
-    }
-  }
-
-  void _watchPermission() {
-    if (!Platform.isMacOS ||
-        _hotkeyErrorCode != kHookPermissionDenied ||
-        _permissionTimer != null) {
-      return;
-    }
-
-    _permissionTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
-      if (_exiting || !services.accessibilityTrusted()) {
-        return;
-      }
-
-      _permissionTimer?.cancel();
-      _permissionTimer = null;
-
-      await _syncHook();
-      if (_hook != null) {
-        _updateStatusForEnabledState();
-      } else {
-        _watchPermission();
-      }
-    });
   }
 
   void _onRecorderChanged() {
@@ -230,14 +182,14 @@ class AppController extends ChangeNotifier
           continue;
         }
 
-        final ShortcutHook? current = _hook;
+        final KeyboardHook? current = _hook;
         if (current != null && current.shortcut == _currentShortcut) {
           continue;
         }
 
         _stopHook();
 
-        final ShortcutHook hook = await startShortcutHook(_currentShortcut);
+        final KeyboardHook hook = await KeyboardHook.start(_currentShortcut);
 
         if (hook.installed) {
           _hook = hook;
@@ -274,9 +226,7 @@ class AppController extends ChangeNotifier
   }
 
   void _updateStatusForEnabledState() {
-    final String? problem = _os.setupProblemKey;
-    final String base = enabled ? L('EnabledStatus') : L('DisabledStatus');
-    _statusText = problem == null ? base : '$base\n\n${L(problem)}';
+    _statusText = enabled ? L('EnabledStatus') : L('DisabledStatus');
     notifyListeners();
   }
 
@@ -437,9 +387,6 @@ class AppController extends ChangeNotifier
   }
 
   void _refreshToastShortcut() {
-    if (!Platform.isWindows) {
-      return;
-    }
     try {
       WindowsRegistry.deleteKey(r'Software\Classes\AppUserModelId\KeyFix');
 
@@ -520,9 +467,7 @@ class AppController extends ChangeNotifier
       }
 
       if (!_trayCreated) {
-        await trayManager.setIcon(
-          Platform.isWindows ? 'assets/KeyFix.ico' : 'assets/title/KeyFix.png',
-        );
+        await trayManager.setIcon('assets/KeyFix.ico');
         await trayManager.setToolTip('KeyFix');
         _trayCreated = true;
       }
@@ -575,13 +520,6 @@ class AppController extends ChangeNotifier
     }
   }
 
-  void _trimMemory() {
-    PaintingBinding.instance.imageCache.clear();
-    if (Platform.isWindows) {
-      MemoryTrimmer.trim();
-    }
-  }
-
   void _scheduleTrim() {
     if (!_windowHidden) {
       return;
@@ -589,24 +527,10 @@ class AppController extends ChangeNotifier
     _trimTimer?.cancel();
     _trimTimer = Timer(const Duration(seconds: 2), () {
       if (_windowHidden) {
-        _trimMemory();
+        PaintingBinding.instance.imageCache.clear();
+        MemoryTrimmer.trim();
       }
     });
-  }
-
-  @override
-  void onWindowBlur() {
-    if (!Platform.isWindows) {
-      return;
-    }
-    _blurTimer?.cancel();
-    _blurTimer = Timer(const Duration(seconds: 4), MemoryTrimmer.trim);
-  }
-
-  @override
-  void onWindowFocus() {
-    _blurTimer?.cancel();
-    _blurTimer = null;
   }
 
   void _setWindowHidden(bool hidden) {
@@ -616,12 +540,10 @@ class AppController extends ChangeNotifier
     _trimLoop = null;
     if (hidden) {
       _scheduleTrim();
-      if (Platform.isWindows) {
-        _trimLoop = Timer.periodic(
-          const Duration(seconds: 60),
-          (_) => MemoryTrimmer.trim(),
-        );
-      }
+      _trimLoop = Timer.periodic(
+        const Duration(seconds: 60),
+        (_) => MemoryTrimmer.trim(),
+      );
     }
   }
 
@@ -633,9 +555,6 @@ class AppController extends ChangeNotifier
 
   Future<void> showMainWindow() async {
     _setWindowHidden(false);
-    if (Platform.isMacOS) {
-      await windowManager.setSkipTaskbar(false);
-    }
     await windowManager.show();
     if (await windowManager.isMinimized()) {
       await windowManager.restore();
@@ -646,9 +565,6 @@ class AppController extends ChangeNotifier
 
   Future<void> hideMainWindow() async {
     await windowManager.hide();
-    if (Platform.isMacOS && settings.showTrayIcon) {
-      await windowManager.setSkipTaskbar(true);
-    }
     _setWindowHidden(true);
     notifyListeners();
   }
@@ -684,14 +600,26 @@ class AppController extends ChangeNotifier
     exit(0);
   }
 
-  static int readAccentColor() => services.readAccentColor();
+  static int readAccentColor() {
+    try {
+      final int? abgr = WindowsRegistry.readDword(
+        r'Software\Microsoft\Windows\DWM',
+        'AccentColor',
+      );
+      if (abgr != null) {
+        final int r = abgr & 0xFF;
+        final int g = (abgr >> 8) & 0xFF;
+        final int b = (abgr >> 16) & 0xFF;
+        return 0xFF000000 | (r << 16) | (g << 8) | b;
+      }
+    } catch (_) {}
+    return 0xFF0078D4;
+  }
 
   @override
   void dispose() {
     _trimTimer?.cancel();
     _trimLoop?.cancel();
-    _blurTimer?.cancel();
-    _permissionTimer?.cancel();
     windowManager.removeListener(this);
     trayManager.removeListener(this);
     _stopHook();

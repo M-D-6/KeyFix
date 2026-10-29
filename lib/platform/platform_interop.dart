@@ -6,20 +6,13 @@ abstract class ClipboardSnapshotHandle {
 }
 
 abstract class PlatformInterop {
+
   KeyTranslator get englishTranslator;
   KeyTranslator get persianTranslator;
-
-  int get pollIntervalMs;
-
-  bool get needsCopySentinel;
-
-  String? get setupProblemKey;
 
   int foregroundWindow();
 
   bool areShortcutKeysDown(ShortcutDefinition shortcut);
-
-  String? readSelectionDirect();
 
   bool sendCopy();
   bool sendPaste();

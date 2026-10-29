@@ -34,7 +34,7 @@ const Map<String, String> kEnglishStrings = <String, String>{
   'ShortcutPlaceholder':
       'Press your new shortcut...',
   'ShortcutHelp':
-      'Press two or three of Ctrl, Alt and Shift together and release them (for example Alt + Shift), or press modifiers plus one key (for example Ctrl + K), or just one special key such as F9 or Pause. If the shortcut is already used by the system or another application, it is better to choose a different one.',
+      'Press two or three of Ctrl, Alt and Shift together and release them (for example Alt + Shift), or press modifiers plus one key (for example Ctrl + K), or just one special key such as F9 or Pause. If the shortcut is already used by Windows or another application, it is better to choose a different one.',
   'ShortcutRecordingStopped':
       'Shortcut entry stopped and your current keys were kept. Click Retry to start over.',
   'RetryShortcut':
@@ -52,7 +52,7 @@ const Map<String, String> kEnglishStrings = <String, String>{
   'Startup':
       'Automatic startup',
   'StartupDescription':
-      'Start KeyFix when you sign in.',
+      'Start KeyFix when Windows starts.',
   'KeepRunningInBackground':
       'Keep running in the background',
   'KeepRunningInBackgroundDescription':
@@ -60,15 +60,15 @@ const Map<String, String> kEnglishStrings = <String, String>{
   'ShowTrayIcon':
       'Show the app icon in the System Tray',
   'ShowTrayIconDescription':
-      'Show the app icon in the system tray or menu bar.',
+      'Show the app icon in the Windows notification area.',
   'StatusNotifications':
       'Conversion notifications',
   'StatusNotificationsDescription':
-      'Show a system notification with the conversion result each time you use the shortcut.',
+      'Show a Windows notification with the conversion result each time you use the shortcut.',
   'AutoSwitchKeyboardLanguageTitle':
       'Automatically switch keyboard language',
   'AutoSwitchKeyboardLanguageDescription':
-      'Automatically switch the keyboard language to match the converted text.',
+      'Automatically switch the Windows keyboard language to match the converted text.',
   'DetectCapsLockTitle':
       'Detect Caps Lock',
   'DetectCapsLockDescription':
@@ -150,19 +150,7 @@ const Map<String, String> kEnglishStrings = <String, String>{
   'ShiftOnlyNotAllowed':
       'Shift with a typing key would break normal typing. Add Ctrl or Alt as well.',
   'ShortcutReserved':
-      'This shortcut is reserved by the system or used internally (for example Alt+Tab, Alt+F4, Ctrl+C, Ctrl+V). Choose another one.',
-  'MacPermissionNeeded':
-      'KeyFix needs Accessibility access to detect the shortcut. Open System Settings > Privacy & Security > Accessibility, turn KeyFix on, and it will start working automatically.',
-  'MacLayoutsUnavailable':
-      'The ABC (or US) and Persian keyboard layouts must both be added in System Settings > Keyboard > Input Sources.',
-  'LinuxClipboardToolMissing':
-      'Install xclip, xsel or wl-clipboard so KeyFix can read and write the clipboard.',
-  'LinuxLayoutsUnavailable':
-      'The xkb "us" and "ir" layouts could not be loaded. Install libxkbcommon and xkb-data.',
-  'LinuxWaylandLimited':
-      'This is a Wayland session. The global shortcut and key injection work only for X11 applications. Log in with an X11 session for full support.',
-  'LinuxNoDisplay':
-      'No X11 display is available, so the shortcut cannot be registered.',
+      'This shortcut is reserved by Windows or used internally (for example Alt+Tab, Alt+F4, Ctrl+C, Ctrl+V). Choose another one.',
 };
 
 const Map<String, String> kPersianStrings = <String, String>{
@@ -199,7 +187,7 @@ const Map<String, String> kPersianStrings = <String, String>{
   'ShortcutPlaceholder':
       'میانبر جدید را فشار دهید...',
   'ShortcutHelp':
-      'دو یا سه کلید از Ctrl، Alt و Shift را با هم بزنید و رها کنید (مثلاً Alt + Shift)، یا کلیدهای تغییردهنده را همراه یک کلید بزنید (مثلاً Ctrl + K)، یا فقط یک کلید ویژه مثل F9 یا Pause را فشار دهید. اگر این میانبر قبلاً توسط سیستم‌عامل یا برنامه دیگری استفاده می‌شود، بهتر است میانبر دیگری انتخاب کنید.',
+      'دو یا سه کلید از Ctrl، Alt و Shift را با هم بزنید و رها کنید (مثلاً Alt + Shift)، یا کلیدهای تغییردهنده را همراه یک کلید بزنید (مثلاً Ctrl + K)، یا فقط یک کلید ویژه مثل F9 یا Pause را فشار دهید. اگر این میانبر قبلاً توسط ویندوز یا برنامه دیگری استفاده می‌شود، بهتر است میانبر دیگری انتخاب کنید.',
   'ShortcutRecordingStopped':
       'ثبت میانبر متوقف شد و کلیدهای واردشده حفظ شدند. برای شروع دوباره روی «تلاش مجدد» کلیک کنید.',
   'RetryShortcut':
@@ -217,7 +205,7 @@ const Map<String, String> kPersianStrings = <String, String>{
   'Startup':
       'اجرای خودکار',
   'StartupDescription':
-      'KeyFix هنگام ورود به سیستم اجرا شود.',
+      'KeyFix هنگام ورود به ویندوز اجرا شود.',
   'KeepRunningInBackground':
       'فعال ماندن در پس‌زمینه',
   'KeepRunningInBackgroundDescription':
@@ -225,15 +213,15 @@ const Map<String, String> kPersianStrings = <String, String>{
   'ShowTrayIcon':
       'نمایش آیکون KeyFix در System Tray',
   'ShowTrayIconDescription':
-      'نمایش آیکون برنامه در System Tray یا نوار منو',
+      'نمایش آیکون برنامه در System Tray',
   'StatusNotifications':
       'اعلان نتیجه تبدیل',
   'StatusNotificationsDescription':
-      'با هر بار استفاده از شورتکات، نتیجه تبدیل به‌صورت اعلان سیستم نمایش داده شود.',
+      'با هر بار استفاده از شورتکات، نتیجه تبدیل به‌صورت اعلان ویندوز نمایش داده شود.',
   'AutoSwitchKeyboardLanguageTitle':
       'تغییر خودکار زبان صفحه‌کلید',
   'AutoSwitchKeyboardLanguageDescription':
-      'زبان فعال صفحه‌کلید را پس از تبدیل، متناسب با زبان متن تغییر می‌دهد.',
+      'زبان فعال صفحه‌کلید ویندوز را پس از تبدیل، متناسب با زبان متن تغییر می‌دهد.',
   'DetectCapsLockTitle':
       'تشخیص Caps Lock',
   'DetectCapsLockDescription':
@@ -315,17 +303,5 @@ const Map<String, String> kPersianStrings = <String, String>{
   'ShiftOnlyNotAllowed':
       'Shift همراه یک کلید نوشتاری تایپ عادی را مختل می‌کند. Ctrl یا Alt را هم اضافه کنید.',
   'ShortcutReserved':
-      'این میانبر برای سیستم‌عامل رزرو شده یا داخل برنامه استفاده می‌شود (مثل Alt+Tab، Alt+F4، Ctrl+C، Ctrl+V). میانبر دیگری انتخاب کنید.',
-  'MacPermissionNeeded':
-      'KeyFix برای تشخیص میانبر به دسترسی Accessibility نیاز دارد. System Settings > Privacy & Security > Accessibility را باز کنید و KeyFix را روشن کنید؛ برنامه خودکار شروع به کار می‌کند.',
-  'MacLayoutsUnavailable':
-      'چیدمان‌های ABC (یا US) و Persian باید هر دو در System Settings > Keyboard > Input Sources اضافه شده باشند.',
-  'LinuxClipboardToolMissing':
-      'برای خواندن و نوشتن کلیپ‌بورد، یکی از xclip یا xsel یا wl-clipboard را نصب کنید.',
-  'LinuxLayoutsUnavailable':
-      'چیدمان‌های xkb با نام us و ir بارگذاری نشد. libxkbcommon و xkb-data را نصب کنید.',
-  'LinuxWaylandLimited':
-      'نشست فعلی Wayland است. میانبر سراسری و ارسال کلید فقط برای برنامه‌های X11 کار می‌کند. برای پشتیبانی کامل با نشست X11 وارد شوید.',
-  'LinuxNoDisplay':
-      'هیچ نمایشگر X11 در دسترس نیست و میانبر ثبت نمی‌شود.',
+      'این میانبر برای ویندوز رزرو شده یا داخل برنامه استفاده می‌شود (مثل Alt+Tab، Alt+F4، Ctrl+C، Ctrl+V). میانبر دیگری انتخاب کنید.',
 };
