@@ -9,7 +9,7 @@
 
 [![Release](https://img.shields.io/github/v/release/M-D-6/KeyFix?style=flat-square&color=b3122f&label=release)](https://github.com/M-D-6/KeyFix/releases)
 [![License](https://img.shields.io/badge/license-GPL--3.0-b3122f?style=flat-square)](LICENSE)
-[![Platform](https://img.shields.io/badge/platform-Windows%2010%2B%20(x64%20%7C%20ARM64)-1f1f23?style=flat-square)](#installation)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-1f1f23?style=flat-square)](#installation)
 [![Flutter](https://img.shields.io/badge/Flutter-3.19%2B-02569B?style=flat-square&logo=flutter&logoColor=white)](https://flutter.dev)
 
 [فارسی](#فارسی) · [English](#english)
@@ -22,7 +22,7 @@
 
 ## فارسی
 
-**KeyFix** یک برنامهٔ سبک برای ویندوز است که متنِ تایپ‌شده با **زبان یا چیدمان اشتباه صفحه‌کلید** را به چیدمان درست برمی‌گرداند. متن را انتخاب کنید، میانبر را بزنید، تمام.
+**KeyFix** یک برنامهٔ سبک برای ویندوز، macOS و Linux است که متنِ تایپ‌شده با **زبان یا چیدمان اشتباه صفحه‌کلید** را به چیدمان درست برمی‌گرداند. متن را انتخاب کنید، میانبر را بزنید، تمام.
 
 ```
 sghl   ⇄   سلام
@@ -34,12 +34,12 @@ sghl   ⇄   سلام
 - تبدیل بین چیدمان **فارسی و انگلیسی** با میانبر سراسری (پیش‌فرض: `Alt + Shift`)
 - تشخیص خودکار جهت تبدیل، حتی در متن ترکیبی
 - تشخیص Caps Lock برای تبدیل متن انگلیسی
-- تغییر خودکار زبان صفحه‌کلید ویندوز پس از تبدیل (اختیاری)
+- تغییر خودکار زبان صفحه‌کلید پس از تبدیل (اختیاری)
 - میانبر قابل تغییر؛ ترکیب کلیدهای کمکی یا کلیدهای مستقل مجاز، مطابق راهنمای داخل برنامه
 - آیکون System Tray با منوی راست‌کلیک برای فعال/غیرفعال‌کردن، بازکردن تنظیمات و خروج
-- اجرا همراه ویندوز و ادامهٔ کار در پس‌زمینه (اختیاری)
+- اجرا همراه ورود به سیستم و ادامهٔ کار در پس‌زمینه (اختیاری)
 - اعلان نتیجهٔ تبدیل (اختیاری)
-- رابط **فارسی و انگلیسی** با پشتیبانی از راست‌چین، تم روشن/تاریک و رنگ تأکیدی ویندوز
+- رابط **فارسی و انگلیسی** با پشتیبانی از راست‌چین، تم روشن/تاریک و رنگ تأکیدی سیستم
 - بدون اتصال به اینترنت و بدون جمع‌آوری اطلاعات
 
 ### 🚀 شروع سریع
@@ -52,7 +52,7 @@ sghl   ⇄   سلام
 
 ### ⚙️ نحوهٔ کار
 
-KeyFix متن انتخاب‌شده را با ارسال `Ctrl+C` می‌خواند، کاراکترها را با استفاده از چیدمان‌های فارسی و انگلیسی ویندوز تبدیل می‌کند و با `Ctrl+V` جایگزین می‌کند. محتوای قبلی کلیپ‌بورد پس از پایان کار بازیابی می‌شود.
+KeyFix متن انتخاب‌شده را با ارسال `Ctrl+C` (در macOS `Cmd+C`) می‌خواند، کاراکترها را با استفاده از چیدمان‌های فارسی و انگلیسی سیستم تبدیل می‌کند و با `Ctrl+V` (در macOS `Cmd+V`) جایگزین می‌کند. محتوای قبلی کلیپ‌بورد پس از پایان کار بازیابی می‌شود.
 
 ### 📦 نصب
 
@@ -69,13 +69,20 @@ KeyFix متن انتخاب‌شده را با ارسال `Ctrl+C` می‌خوا�
 
 برای استفاده از نسخهٔ قابل‌حمل، فایل ZIP را در پوشه‌ای دلخواه استخراج و `KeyFix.exe` را اجرا کنید؛ به نصب جداگانهٔ Flutter نیاز نیست.
 
-حداقل نیاز: ویندوز ۱۰ (نسخهٔ 1809) یا ویندوز ۱۱. نسخه‌های x64 و ARM64 منتشر می‌شوند؛ ویندوز ۳۲ بیتی پشتیبانی نمی‌شود.
+حداقل نیاز در ویندوز: ویندوز ۱۰ (نسخهٔ 1809) یا ویندوز ۱۱. نسخه‌های x64 و ARM64 منتشر می‌شوند؛ ویندوز ۳۲ بیتی پشتیبانی نمی‌شود.
+
+برای macOS فایل `KeyFix-macos.dmg` (یا `KeyFix-macos.zip`) و برای Linux یکی از `KeyFix-linux-x64.deb` (Debian، Ubuntu، Mint)، `KeyFix-linux-x64.rpm` (Fedora، Red Hat، openSUSE)، `KeyFix-linux-x64.AppImage` (همهٔ توزیع‌ها، بدون نصب) یا `KeyFix-linux-x64.tar.gz` را دریافت کنید.
+
+**macOS:** برنامه با امضای محلی (ad-hoc) و بدون Apple Developer ID منتشر می‌شود؛ بار اول روی آن راست‌کلیک و **Open** را بزنید (یا در Terminal دستور `xattr -dr com.apple.quarantine /Applications/KeyFix.app` را اجرا کنید). برای تشخیص میانبر سراسری باید در System Settings › Privacy & Security › Accessibility اجازه بدهید؛ پس از دادن اجازه برنامه خودکار فعال می‌شود. چیدمان‌های ABC (یا US) و Persian باید در Input Sources اضافه باشند. با هر نسخهٔ جدید ممکن است لازم باشد این اجازه را دوباره بدهید.
+
+**Linux:** پشتیبانی کامل برای نشست **X11** است. به یکی از `xclip` یا `xsel` (یا `wl-clipboard`) نیاز دارد. در Wayland میانبر سراسری و ارسال کلید فقط برای برنامه‌های X11 (XWayland) کار می‌کند. برای نمایش آیکون در سینی، افزونهٔ AppIndicator (در GNOME) لازم است.
 
 ### ⚠️ محدودیت‌ها
 
 - KeyFix با دسترسی معمولی کاربر اجرا می‌شود؛ بنابراین ممکن است نتواند در پنجره‌هایی که **به‌صورت Administrator** اجرا شده‌اند متن را تبدیل کند (محدودیت امنیتی ویندوز).
-- اگر میانبر انتخابی را ویندوز یا برنامهٔ دیگری استفاده کند، ثبت آن ممکن است شکست بخورد؛ میانبر دیگری انتخاب کنید.
-- در حال حاضر نسخهٔ Flutter فقط از ویندوز پشتیبانی می‌کند.
+- اگر میانبر انتخابی را سیستم‌عامل یا برنامهٔ دیگری استفاده کند، ثبت آن ممکن است شکست بخورد؛ میانبر دیگری انتخاب کنید.
+- در Linux زیر Wayland فقط برنامه‌های X11 پشتیبانی می‌شوند؛ در macOS بدون اجازهٔ Accessibility میانبر کار نمی‌کند.
+- نسخه‌های macOS و Linux تازه اضافه شده‌اند و ممکن است هنوز مشکلاتی داشته باشند؛ گزارش خطا کمک می‌کند.
 
 ### 🛠️ تنظیمات و گزارش خطا
 
@@ -108,10 +115,12 @@ iscc KeyFix.iss
 
 خروجی نصب‌کننده در `Output\KeyFix-Setup-x64.exe` قرار می‌گیرد. برای ARM64 پیش از اجرا مقدار `$env:KEYFIX_ARCH = 'arm64'` را تنظیم کنید.
 
+ساخت برای macOS و Linux: ابتدا یک‌بار `flutter create --platforms=macos,linux --project-name keyfix .` را اجرا کنید و فایل‌های پوشهٔ `ci` را مانند workflow در `.github/workflows` روی پروژهٔ تولیدشده اعمال کنید (برای Linux بسته‌های `libgtk-3-dev`، `libayatana-appindicator3-dev` و `libnotify-dev` لازم است)، سپس `flutter build macos --release` یا `flutter build linux --release`.
+
 ### 🧩 ساختار کد
 
 - `lib/core` — تبدیل متن، نقشهٔ چیدمان، قوانین میانبر، تنظیمات و بومی‌سازی
-- `lib/platform` — لایهٔ ارتباط با سیستم‌عامل و پیاده‌سازی ویندوز
+- `lib/platform` — لایهٔ ارتباط با سیستم‌عامل؛ پیاده‌سازی‌های `windows`، `macos` و `linux`
 - `lib/services` — کنترل برنامه، تبدیل متن انتخاب‌شده و ثبت میانبر
 - `lib/ui` — تم، پنجرهٔ اصلی و رابط تنظیم میانبر
 - `test` — تست‌های تبدیل صفحه‌کلید، تنظیمات، بومی‌سازی و میانبرها
@@ -126,7 +135,7 @@ KeyFix یک نرم‌افزار آزاد و مشتق از نسخهٔ اصلی Ke
 
 ## English
 
-**KeyFix** is a lightweight Windows utility that fixes text typed with the **wrong keyboard language or layout**. Select the text, press a shortcut, done.
+**KeyFix** is a lightweight utility for Windows, macOS and Linux that fixes text typed with the **wrong keyboard language or layout**. Select the text, press a shortcut, done.
 
 ```
 sghl   ⇄   سلام
@@ -138,12 +147,12 @@ sghl   ⇄   سلام
 - Converts between the **Persian and English** layouts with a global shortcut (default: `Alt + Shift`)
 - Detects conversion direction automatically, including mixed text
 - Detects Caps Lock when converting English text
-- Optionally switches the Windows keyboard language to match the converted text
+- Optionally switches the keyboard language to match the converted text
 - Customizable shortcut; supported combinations are described in the in-app shortcut dialog
 - System Tray icon and context menu to enable/disable KeyFix, open the settings window, or exit
-- Optional start with Windows and background operation
+- Optional start at sign-in and background operation
 - Optional conversion notifications
-- **Persian and English** interface with RTL support, light/dark appearance, and the Windows accent colour
+- **Persian and English** interface with RTL support, light/dark appearance, and the system accent colour
 - No network access and no data collection
 
 ### 🚀 Quick start
@@ -156,7 +165,7 @@ To change the shortcut, open **Change shortcut**, record a new combination, and 
 
 ### ⚙️ How it works
 
-KeyFix reads the selected text by sending `Ctrl+C`, converts characters using the Persian and English layouts available in Windows, and replaces the selection with `Ctrl+V`. The previous clipboard content is restored afterwards.
+KeyFix reads the selected text by sending `Ctrl+C` (`Cmd+C` on macOS), converts characters using the Persian and English layouts available on the system, and replaces the selection with `Ctrl+V` (`Cmd+V` on macOS). The previous clipboard content is restored afterwards.
 
 ### 📦 Installation
 
@@ -173,13 +182,20 @@ Run the installer for a standard installation. It supports English and Persian a
 
 For the portable build, extract the ZIP to any folder and run `KeyFix.exe`. You do not need to install Flutter separately.
 
-Requires Windows 10 (version 1809) or Windows 11. x64 and ARM64 builds are published; 32-bit Windows is not supported.
+On Windows, requires Windows 10 (version 1809) or Windows 11. x64 and ARM64 builds are published; 32-bit Windows is not supported.
+
+For macOS download `KeyFix-macos.dmg` (or `KeyFix-macos.zip`); for Linux download `KeyFix-linux-x64.deb` (Debian, Ubuntu, Mint), `KeyFix-linux-x64.rpm` (Fedora, Red Hat, openSUSE), `KeyFix-linux-x64.AppImage` (any distribution, no install) or `KeyFix-linux-x64.tar.gz`.
+
+**macOS:** the app is ad-hoc signed without an Apple Developer ID, so the first time right-click it and choose **Open** (or run `xattr -dr com.apple.quarantine /Applications/KeyFix.app`). Detecting the global shortcut requires permission in System Settings › Privacy & Security › Accessibility; KeyFix starts working automatically once it is granted. The ABC (or US) and Persian layouts must be added under Input Sources. The permission may need to be granted again after an update.
+
+**Linux:** full support is for **X11** sessions. It needs `xclip` or `xsel` (or `wl-clipboard`). On Wayland the global shortcut and key injection work only for X11 (XWayland) applications. The tray icon needs an AppIndicator extension on GNOME.
 
 ### ⚠️ Limitations
 
 - KeyFix runs with normal user privileges, so it may not convert text in windows running **as Administrator** (a Windows security restriction).
-- If the selected shortcut is reserved by Windows or another app, registration may fail; choose a different combination.
-- The Flutter port currently supports Windows only.
+- If the selected shortcut is reserved by the system or another app, registration may fail; choose a different combination.
+- On Linux under Wayland only X11 applications are supported; on macOS the shortcut does not work without the Accessibility permission.
+- The macOS and Linux builds are new and may still have rough edges; bug reports are welcome.
 
 ### 🛠️ Settings and diagnostics
 
@@ -212,10 +228,12 @@ iscc KeyFix.iss
 
 The installer is written to `Output\KeyFix-Setup-x64.exe`. On ARM64, set `$env:KEYFIX_ARCH = 'arm64'` first.
 
+Building for macOS and Linux: run `flutter create --platforms=macos,linux --project-name keyfix .` once and apply the files in `ci` to the generated projects as the workflow in `.github/workflows` does (Linux needs `libgtk-3-dev`, `libayatana-appindicator3-dev` and `libnotify-dev`), then run `flutter build macos --release` or `flutter build linux --release`.
+
 ### 🧩 Code layout
 
 - `lib/core` — converter, layout map, shortcut rules, settings, and localization
-- `lib/platform` — platform abstraction and Windows implementation
+- `lib/platform` — platform abstraction with `windows`, `macos` and `linux` implementations
 - `lib/services` — app controller, selected-text conversion, and shortcut recording
 - `lib/ui` — theme, main window, and shortcut dialog
 - `test` — keyboard conversion, settings, localization, and shortcut tests

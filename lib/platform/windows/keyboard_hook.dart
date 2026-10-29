@@ -6,9 +6,10 @@ import 'dart:typed_data';
 import 'package:ffi/ffi.dart';
 
 import '../../core/shortcut_definition.dart';
+import '../shortcut_hook.dart';
 import 'win32.dart' as w;
 
-class KeyboardHook {
+class KeyboardHook implements ShortcutHook {
   KeyboardHook._(
     this.shortcut,
     this._port,
@@ -18,18 +19,22 @@ class KeyboardHook {
     this.errorCode,
   );
 
+  @override
   final ShortcutDefinition shortcut;
   final ReceivePort _port;
   final Isolate? _isolate;
   final int _threadId;
   bool _disposed = false;
 
+  @override
   final bool installed;
 
+  @override
   final int errorCode;
 
   final StreamController<void> _pressed = StreamController<void>.broadcast();
 
+  @override
   Stream<void> get pressed => _pressed.stream;
 
   static void Function(String line)? onLog;
@@ -58,7 +63,10 @@ class KeyboardHook {
       }
 
       if (message == 'pressed') {
-        forward?.add(null);
+        final StreamController<void>? sink = forward;
+        if (sink != null && !sink.isClosed) {
+          sink.add(null);
+        }
       }
     });
 
@@ -84,6 +92,7 @@ class KeyboardHook {
     return hook;
   }
 
+  @override
   void dispose() {
     if (_disposed) {
       return;

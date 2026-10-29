@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=KeyFix
+Comment=Fix text typed in the wrong keyboard layout
+Exec=/opt/keyfix/keyfix
+Icon=keyfix
+Terminal=false
+Categories=Utility;
+StartupWMClass=keyfix

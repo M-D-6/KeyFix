@@ -1,4 +1,4 @@
-name: Build Windows
+name: Build
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ on:
       - 'v*'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
@@ -23,198 +23,267 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Flutter (x64)
+      - name: Validate release version
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          $line = Select-String -Path pubspec.yaml -Pattern '^version:\s*([0-9]+\.[0-9]+\.[0-9]+)(?:\+[0-9]+)?\s*$'
+          if (-not $line) { throw 'Could not read a valid version from pubspec.yaml.' }
+          $manifestVersion = $line.Matches[0].Groups[1].Value
+          $tagVersion = $env:RELEASE_TAG -replace '^v', ''
+          if ($tagVersion -ne $manifestVersion) {
+            throw "Release tag $tagVersion does not match pubspec.yaml version $manifestVersion."
+          }
+
+      - uses: subosito/flutter-action@v2
         if: matrix.arch == 'x64'
-        uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.47.7'
           channel: stable
           cache: true
 
-      - name: Install Flutter (ARM64)
+      - name: Install Flutter (arm64)
         if: matrix.arch == 'arm64'
         shell: pwsh
         run: |
-          $flutterRoot = Join-Path $env:RUNNER_TEMP 'flutter'
-          git clone --depth 1 --branch 3.47.7 https://github.com/flutter/flutter.git $flutterRoot
-          if ($LASTEXITCODE -ne 0) { throw 'Could not download the pinned Flutter SDK.' }
-
-          $flutterBin = Join-Path $flutterRoot 'bin'
-          Add-Content -Path $env:GITHUB_PATH -Value $flutterBin
+          git clone --depth 1 --branch stable https://github.com/flutter/flutter.git "$env:RUNNER_TEMP\flutter"
+          "$env:RUNNER_TEMP\flutter\bin" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+          $flutterBin = "$env:RUNNER_TEMP\flutter\bin"
           Write-Host "PROCESSOR_ARCHITECTURE=$env:PROCESSOR_ARCHITECTURE"
-          & (Join-Path $flutterBin 'flutter.bat') --version
-          if ($LASTEXITCODE -ne 0) { throw 'Flutter SDK could not start.' }
+          & "$flutterBin\flutter.bat" --version
+          $dart = & "$flutterBin\dart.bat" --version 2>&1 | Out-String
+          Write-Host $dart
+          if ($dart -notmatch 'windows_arm64') { throw "Flutter picked a non-arm64 Dart SDK: $dart" }
 
-          $dartOutput = & (Join-Path $flutterBin 'dart.bat') --version 2>&1 | Out-String
-          Write-Host $dartOutput
-          if ($LASTEXITCODE -ne 0 -or $dartOutput -notmatch 'windows_arm64') {
-            throw "Flutter did not select the native Windows ARM64 Dart SDK: $dartOutput"
-          }
-
-      - name: Validate source and release version
-        shell: pwsh
-        run: |
-          $versionLine = Select-String -Path 'pubspec.yaml' -Pattern '^version:\s*(\d+\.\d+\.\d+)(?:\+(\d+))?\s*$' | Select-Object -First 1
-          if (-not $versionLine) { throw 'Could not read a valid version from pubspec.yaml.' }
-
-          $versionMatch = [regex]::Match($versionLine.Line, '^version:\s*(\d+\.\d+\.\d+)(?:\+(\d+))?\s*$')
-          $version = $versionMatch.Groups[1].Value
-          $buildNumber = $versionMatch.Groups[2].Value
-          if ([string]::IsNullOrWhiteSpace($buildNumber)) { $buildNumber = '1' }
-
-          if ($env:GITHUB_REF -like 'refs/tags/*') {
-            if ($env:GITHUB_REF_NAME -notmatch '^v\d+\.\d+\.\d+$') {
-              throw "Invalid release tag '$env:GITHUB_REF_NAME'. Expected vMAJOR.MINOR.PATCH."
-            }
-            $tagVersion = $env:GITHUB_REF_NAME.Substring(1)
-            if ($tagVersion -ne $version) {
-              throw "Release tag $tagVersion does not match pubspec.yaml version $version. Update the project version before tagging."
-            }
-          }
-
-          "KEYFIX_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-          "KEYFIX_BUILD_NUMBER=$buildNumber" | Out-File -FilePath $env:GITHUB_ENV -Append -Encoding utf8
-          Write-Host "Building KeyFix $version+$buildNumber for ${{ matrix.arch }}."
-
-      - name: Get dependencies
-        run: flutter pub get
-
-      - name: Analyze Dart code
-        run: flutter analyze
-
-      - name: Run tests
-        run: flutter test
-
-      - name: Build Windows release
-        run: flutter build windows --release --build-name "$env:KEYFIX_VERSION" --build-number "$env:KEYFIX_BUILD_NUMBER"
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter build windows --release
 
       - name: Package portable build
         shell: pwsh
         run: |
-          $releaseDir = Join-Path $PWD "build\windows\${{ matrix.arch }}\runner\Release"
-          $executable = Join-Path $releaseDir 'KeyFix.exe'
-          if (-not (Test-Path $executable -PathType Leaf)) {
-            throw "Windows release executable was not produced at the expected path: $executable"
-          }
-
-          $runtimeFiles = @(Get-ChildItem -Path $releaseDir -File -Recurse)
-          if ($runtimeFiles.Count -lt 2) { throw 'Windows release directory is unexpectedly empty or incomplete.' }
-
-          $archive = "KeyFix-windows-${{ matrix.arch }}.zip"
-          Compress-Archive -Path (Join-Path $releaseDir '*') -DestinationPath $archive -CompressionLevel Optimal
-          if (-not (Test-Path $archive -PathType Leaf)) { throw 'Portable archive was not produced.' }
-
-          Add-Type -AssemblyName System.IO.Compression.FileSystem
-          $zip = [System.IO.Compression.ZipFile]::OpenRead((Join-Path $PWD $archive))
-          try {
-            if (-not ($zip.Entries | Where-Object { $_.FullName -eq 'KeyFix.exe' })) {
-              throw 'Portable archive does not contain KeyFix.exe at its root.'
-            }
-          } finally {
-            $zip.Dispose()
-          }
+          $releaseDir = "build\windows\${{ matrix.arch }}\runner\Release"
+          if (-not (Test-Path (Join-Path $releaseDir 'KeyFix.exe'))) { throw "KeyFix.exe was not found in $releaseDir." }
+          if (-not (Get-ChildItem -Path $releaseDir -File -Recurse | Select-Object -First 1)) { throw "Release directory is empty: $releaseDir" }
+          Compress-Archive -Path (Join-Path $releaseDir '*') -DestinationPath "KeyFix-windows-${{ matrix.arch }}.zip" -CompressionLevel Optimal
+          if ((Get-Item "KeyFix-windows-${{ matrix.arch }}.zip").Length -le 0) { throw 'Portable ZIP is empty.' }
 
       - name: Build installer
         shell: pwsh
         env:
+          RELEASE_TAG: ${{ github.ref_name }}
           KEYFIX_ARCH: ${{ matrix.arch }}
         run: |
+          $line = Select-String -Path pubspec.yaml -Pattern '^version:\s*([0-9]+\.[0-9]+\.[0-9]+)(?:\+[0-9]+)?\s*$'
+          if (-not $line) { throw 'Could not read a valid version from pubspec.yaml.' }
+          $version = $line.Matches[0].Groups[1].Value
+          $env:KEYFIX_VERSION = $version
+
           function Find-Iscc {
             $command = Get-Command ISCC.exe -ErrorAction SilentlyContinue
             if ($command) { return $command.Source }
 
             $roots = @(
               ${env:ProgramFiles(x86)},
-              $env:ProgramFiles
+              $env:ProgramFiles,
+              (Join-Path $env:LOCALAPPDATA 'Programs')
             ) | Where-Object { $_ -and (Test-Path $_) }
-
-            if ($env:LOCALAPPDATA) {
-              $localPrograms = Join-Path $env:LOCALAPPDATA 'Programs'
-              if (Test-Path $localPrograms) { $roots += $localPrograms }
-            }
 
             foreach ($root in $roots) {
               foreach ($dir in Get-ChildItem -Path $root -Directory -Filter 'Inno Setup*' -ErrorAction SilentlyContinue) {
                 $candidate = Join-Path $dir.FullName 'ISCC.exe'
-                if (Test-Path $candidate -PathType Leaf) { return $candidate }
+                if (Test-Path $candidate) { return $candidate }
               }
             }
 
             if ($env:ChocolateyInstall) {
-              $chocoLib = Join-Path $env:ChocolateyInstall 'lib'
-              if (Test-Path $chocoLib) {
-                $found = Get-ChildItem -Path $chocoLib -Filter ISCC.exe -File -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
-                if ($found) { return $found.FullName }
-              }
+              $found = Get-ChildItem -Path (Join-Path $env:ChocolateyInstall 'lib') -Filter ISCC.exe -File -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+              if ($found) { return $found.FullName }
             }
+
             return $null
           }
 
           $iscc = Find-Iscc
           if (-not $iscc) {
             choco install innosetup --no-progress -y
-            if ($LASTEXITCODE -ne 0) { throw 'Inno Setup installation failed.' }
             $iscc = Find-Iscc
           }
-          if (-not $iscc) { throw 'Inno Setup compiler (ISCC.exe) was not found.' }
+          if (-not $iscc) {
+            Get-ChildItem -Path ${env:ProgramFiles(x86)}, $env:ProgramFiles -Directory -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
+            throw 'Inno Setup compiler was not found.'
+          }
 
-          Write-Host "Using Inno Setup compiler: $iscc"
+          Write-Host "Using $iscc"
           & $iscc /Qp KeyFix.iss
-          if ($LASTEXITCODE -ne 0) { throw "Inno Setup failed with exit code $LASTEXITCODE." }
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if (-not (Test-Path "Output\KeyFix-Setup-$env:KEYFIX_ARCH.exe")) { throw 'Installer was not produced.' }
 
-          $installer = "Output\KeyFix-Setup-$env:KEYFIX_ARCH.exe"
-          if (-not (Test-Path $installer -PathType Leaf)) { throw "Installer was not produced: $installer" }
-          if ((Get-Item $installer).Length -le 0) { throw 'Installer output is empty.' }
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v4
         with:
           name: KeyFix-windows-${{ matrix.arch }}
           path: |
             KeyFix-windows-${{ matrix.arch }}.zip
             Output/KeyFix-Setup-${{ matrix.arch }}.exe
-          if-no-files-found: error
-          retention-days: 14
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate release version
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          version=$(sed -nE 's/^version:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+)(\+[0-9]+)?[[:space:]]*$/\1/p' pubspec.yaml | head -n1)
+          test -n "$version" || { echo 'Could not read pubspec.yaml version.'; exit 1; }
+          test "${RELEASE_TAG#v}" = "$version" || { echo "Release tag ${RELEASE_TAG#v} does not match pubspec.yaml version $version."; exit 1; }
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Generate macOS runner
+        run: |
+          flutter create --platforms=macos --project-name keyfix --org app.keyfix .
+          rm -f test/widget_test.dart
+          cp ci/macos/AppDelegate.swift macos/Runner/AppDelegate.swift
+          sed -i '' 's/^PRODUCT_NAME = .*/PRODUCT_NAME = KeyFix/' macos/Runner/Configs/AppInfo.xcconfig
+          for f in macos/Runner/DebugProfile.entitlements macos/Runner/Release.entitlements; do
+            /usr/libexec/PlistBuddy -c 'Set :com.apple.security.app-sandbox false' "$f"
+          done
+          icons=macos/Runner/Assets.xcassets/AppIcon.appiconset
+          for size in 16 32 64 128 256 512 1024; do
+            sips -z $size $size docs/logo.png --out "$icons/app_icon_$size.png" >/dev/null
+          done
+
+      - run: flutter pub get
+      - run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - run: flutter test
+      - run: flutter build macos --release
+
+      - name: Package
+        run: |
+          app="build/macos/Build/Products/Release/KeyFix.app"
+          test -d "$app" || { echo "macOS app bundle not found: $app"; exit 1; }
+          codesign --force --deep --sign - "$app"
+          ditto -c -k --keepParent "$app" KeyFix-macos.zip
+          mkdir dmg && cp -R "$app" dmg/
+          ln -s /Applications dmg/Applications
+          hdiutil create -volname KeyFix -srcfolder dmg -ov -format UDZO KeyFix-macos.dmg
+          test -s KeyFix-macos.zip && test -s KeyFix-macos.dmg
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KeyFix-macos
+          path: |
+            KeyFix-macos.zip
+            KeyFix-macos.dmg
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate release version
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          version=$(sed -nE 's/^version:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+)(\+[0-9]+)?[[:space:]]*$/\1/p' pubspec.yaml | head -n1)
+          test -n "$version" || { echo 'Could not read pubspec.yaml version.'; exit 1; }
+          test "${RELEASE_TAG#v}" = "$version" || { echo "Release tag ${RELEASE_TAG#v} does not match pubspec.yaml version $version."; exit 1; }
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libayatana-appindicator3-dev libnotify-dev liblzma-dev rpm
+
+      - name: Generate Linux runner
+        run: |
+          flutter create --platforms=linux --project-name keyfix --org app.keyfix .
+          rm -f test/widget_test.dart
+          sed -i 's/gboolean use_header_bar = TRUE;/gboolean use_header_bar = FALSE;/' linux/runner/my_application.cc
+
+      - run: flutter pub get
+      - run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - run: flutter test
+      - run: flutter build linux --release
+
+      - name: Package
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          version=$(sed -nE 's/^version:[[:space:]]*([0-9]+\.[0-9]+\.[0-9]+)(\+[0-9]+)?[[:space:]]*$/\1/p' pubspec.yaml | head -n1)
+          test -n "$version" || { echo 'Could not read pubspec.yaml version.'; exit 1; }
+          if [[ "$GITHUB_REF" == refs/tags/v* ]] && [[ "${RELEASE_TAG#v}" != "$version" ]]; then
+            echo "Release tag ${RELEASE_TAG#v} does not match pubspec.yaml version $version."
+            exit 1
+          fi
+          bundle=build/linux/x64/release/bundle
+          tar -C "$(dirname "$bundle")" -czf KeyFix-linux-x64.tar.gz bundle
+          ci/build_deb.sh "$version" "$bundle" KeyFix-linux-x64.deb
+          ci/build_rpm.sh "$version" "$bundle" KeyFix-linux-x64.rpm
+          ci/build_appimage.sh "$bundle" KeyFix-linux-x64.AppImage
+          for artifact in KeyFix-linux-x64.tar.gz KeyFix-linux-x64.deb KeyFix-linux-x64.rpm KeyFix-linux-x64.AppImage; do
+            test -s "$artifact" || { echo "Missing or empty artifact: $artifact"; exit 1; }
+          done
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KeyFix-linux-x64
+          path: |
+            KeyFix-linux-x64.tar.gz
+            KeyFix-linux-x64.deb
+            KeyFix-linux-x64.rpm
+            KeyFix-linux-x64.AppImage
 
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: build
+    if: ${{ always() && startsWith(github.ref, 'refs/tags/v') && needs.build.result == 'success' && needs.macos.result == 'success' && needs.linux.result == 'success' }}
+    needs: [build, macos, linux]
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4
         with:
           path: dist
           merge-multiple: true
 
-      - name: Validate all release artifacts
+      - name: Validate release artifacts
         shell: bash
         run: |
           set -euo pipefail
-          expected=(
-            "KeyFix-windows-x64.zip"
-            "KeyFix-Setup-x64.exe"
-            "KeyFix-windows-arm64.zip"
-            "KeyFix-Setup-arm64.exe"
+          required=(
+            KeyFix-windows-x64.zip
+            KeyFix-Setup-x64.exe
+            KeyFix-windows-arm64.zip
+            KeyFix-Setup-arm64.exe
+            KeyFix-macos.zip
+            KeyFix-macos.dmg
+            KeyFix-linux-x64.tar.gz
+            KeyFix-linux-x64.deb
+            KeyFix-linux-x64.rpm
+            KeyFix-linux-x64.AppImage
           )
-
-          for name in "${expected[@]}"; do
-            if [[ ! -s "dist/$name" ]]; then
-              echo "Required release artifact is missing or empty: $name" >&2
+          for name in "${required[@]}"; do
+            matches=$(find dist -type f -name "$name" -size +0c | wc -l | tr -d ' ')
+            if [[ "$matches" != "1" ]]; then
+              echo "Expected exactly one non-empty artifact named $name; found $matches."
+              find dist -type f -print | sort
               exit 1
             fi
           done
+          echo "Validated all ${#required[@]} required release artifacts."
 
-          actual_count=$(find dist -maxdepth 1 -type f \( -name '*.zip' -o -name '*.exe' \) | wc -l)
-          if [[ "$actual_count" -ne "${#expected[@]}" ]]; then
-            echo "Expected ${#expected[@]} release files, found $actual_count." >&2
-            find dist -maxdepth 1 -type f -printf '%f\n' | sort
-            exit 1
-          fi
-
-      - name: Publish release without deleting the existing release
+      - name: Publish release
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -222,15 +291,11 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          files=(
-            "dist/KeyFix-windows-x64.zip"
-            "dist/KeyFix-Setup-x64.exe"
-            "dist/KeyFix-windows-arm64.zip"
-            "dist/KeyFix-Setup-arm64.exe"
-          )
-
+          mapfile -t files < <(find dist -type f \
+            \( -name '*.zip' -o -name '*.exe' -o -name '*.dmg' -o -name '*.deb' -o -name '*.rpm' -o -name '*.AppImage' -o -name '*.tar.gz' \) | sort)
           if gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1; then
             gh release upload "$TAG" "${files[@]}" --repo "$REPO" --clobber
           else
-            gh release create "$TAG" "${files[@]}" --repo "$REPO" --title "KeyFix $TAG" --generate-notes
+            gh release create "$TAG" "${files[@]}" --repo "$REPO" --title "KeyFix $TAG" --generate-notes --verify-tag
           fi
+          gh release view "$TAG" --repo "$REPO" --json url,isDraft,assets --jq '{url, isDraft, assets: [.assets[].name]}'
