@@ -1,4 +1,4 @@
-name: Build Windows
+name: Build
 
 on:
   workflow_dispatch:
@@ -110,9 +110,103 @@ jobs:
             KeyFix-windows-${{ matrix.arch }}.zip
             Output/KeyFix-Setup-${{ matrix.arch }}.exe
 
+  macos:
+    runs-on: macos-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Generate macOS runner
+        run: |
+          flutter create --platforms=macos --project-name keyfix --org app.keyfix .
+          rm -f test/widget_test.dart
+          cp ci/macos/AppDelegate.swift macos/Runner/AppDelegate.swift
+          sed -i '' 's/^PRODUCT_NAME = .*/PRODUCT_NAME = KeyFix/' macos/Runner/Configs/AppInfo.xcconfig
+          for f in macos/Runner/DebugProfile.entitlements macos/Runner/Release.entitlements; do
+            /usr/libexec/PlistBuddy -c 'Set :com.apple.security.app-sandbox false' "$f"
+          done
+          icons=macos/Runner/Assets.xcassets/AppIcon.appiconset
+          for size in 16 32 64 128 256 512 1024; do
+            sips -z $size $size docs/logo.png --out "$icons/app_icon_$size.png" >/dev/null
+          done
+
+      - run: flutter pub get
+      - run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - run: flutter test
+      - run: flutter build macos --release
+
+      - name: Package
+        run: |
+          app="build/macos/Build/Products/Release/KeyFix.app"
+          codesign --force --deep --sign - "$app"
+          ditto -c -k --keepParent "$app" KeyFix-macos.zip
+          mkdir dmg && cp -R "$app" dmg/
+          ln -s /Applications dmg/Applications
+          hdiutil create -volname KeyFix -srcfolder dmg -ov -format UDZO KeyFix-macos.dmg
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KeyFix-macos
+          path: |
+            KeyFix-macos.zip
+            KeyFix-macos.dmg
+
+  linux:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libayatana-appindicator3-dev libnotify-dev liblzma-dev rpm
+
+      - name: Generate Linux runner
+        run: |
+          flutter create --platforms=linux --project-name keyfix --org app.keyfix .
+          rm -f test/widget_test.dart
+          sed -i 's/gboolean use_header_bar = TRUE;/gboolean use_header_bar = FALSE;/' linux/runner/my_application.cc
+
+      - run: flutter pub get
+      - run: flutter analyze --no-fatal-infos --no-fatal-warnings
+      - run: flutter test
+      - run: flutter build linux --release
+
+      - name: Package
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          version=$(sed -n 's/^version:[[:space:]]*\([0-9][0-9.]*\).*/\1/p' pubspec.yaml | head -n1)
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then version="${RELEASE_TAG#v}"; fi
+          bundle=build/linux/x64/release/bundle
+          tar -C "$(dirname "$bundle")" -czf KeyFix-linux-x64.tar.gz bundle
+          ci/build_deb.sh "$version" "$bundle" KeyFix-linux-x64.deb
+          ci/build_rpm.sh "$version" "$bundle" KeyFix-linux-x64.rpm
+          ci/build_appimage.sh "$bundle" KeyFix-linux-x64.AppImage
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: KeyFix-linux-x64
+          path: |
+            KeyFix-linux-x64.tar.gz
+            KeyFix-linux-x64.deb
+            KeyFix-linux-x64.rpm
+            KeyFix-linux-x64.AppImage
+
   release:
-    if: startsWith(github.ref, 'refs/tags/v')
-    needs: build
+    if: ${{ !cancelled() && needs.build.result == 'success' && startsWith(github.ref, 'refs/tags/v') }}
+    needs: [build, macos, linux]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4
@@ -127,10 +221,13 @@ jobs:
           TAG: ${{ github.ref_name }}
           REPO: ${{ github.repository }}
         run: |
-          mapfile -t files < <(find dist -type f \( -name '*.zip' -o -name '*.exe' \) | sort)
+          set -euo pipefail
+          mapfile -t files < <(find dist -type f \( -name '*.zip' -o -name '*.exe' -o -name '*.dmg' -o -name '*.deb' -o -name '*.rpm' -o -name '*.AppImage' -o -name '*.tar.gz' \) | sort)
           printf '%s\n' "${files[@]}"
-          if gh release view "$TAG" --repo "$REPO" > /dev/null 2>&1; then
-            gh release upload "$TAG" "${files[@]}" --repo "$REPO" --clobber
-          else
-            gh release create "$TAG" "${files[@]}" --repo "$REPO" --title "KeyFix $TAG" --generate-notes
-          fi
+
+          for id in $(gh api "repos/$REPO/releases" --paginate --jq '.[] | select(.tag_name == env.TAG) | .id'); do
+            gh api -X DELETE "repos/$REPO/releases/$id"
+          done
+
+          gh release create "$TAG" "${files[@]}" --repo "$REPO" --title "KeyFix $TAG" --generate-notes --verify-tag
+          gh release view "$TAG" --repo "$REPO" --json url,isDraft,assets --jq '{url, isDraft, assets: [.assets[].name]}'

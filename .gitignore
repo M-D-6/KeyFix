@@ -10,3 +10,5 @@ windows/flutter/ephemeral/
 .vscode/
 *.iml
 Output/
+macos/
+linux/

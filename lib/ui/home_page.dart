@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -62,7 +64,7 @@ class _HomePageState extends State<HomePage> {
               },
               child: DragToMoveArea(
                 child: Padding(
-                  padding: const EdgeInsets.only(left: 12),
+                  padding: EdgeInsets.only(left: Platform.isMacOS ? 78 : 12),
                   child: Row(
                     children: <Widget>[
                       Image.asset(
@@ -87,7 +89,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-          const CaptionButtons(),
+          if (!Platform.isMacOS) const CaptionButtons(),
         ],
       ),
     );

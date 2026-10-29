@@ -14,11 +14,6 @@ const String _initialLanguageArgument = '--initial-language=';
 Future<void> main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (!Platform.isWindows) {
-    stderr.writeln('KeyFix: this build supports Windows only for now.');
-    exit(1);
-  }
-
   final bool startedFromStartup = args.any(
     (String a) => a.toLowerCase() == _startupArgument,
   );
@@ -37,7 +32,9 @@ Future<void> main(List<String> args) async {
     ..maximumSize = 16
     ..maximumSizeBytes = 4 * 1024 * 1024;
 
-  enableSystemThemedMenus();
+  if (Platform.isWindows) {
+    enableSystemThemedMenus();
+  }
 
   await windowManager.ensureInitialized();
 
@@ -59,10 +56,14 @@ Future<void> main(List<String> args) async {
   await windowManager.waitUntilReadyToShow(options, () async {
     if (!startedFromStartup) {
       await controller.showMainWindow();
+    } else if (!Platform.isWindows) {
+      await controller.hideMainWindow();
     }
   });
 
-  applyWindowIcon();
+  if (Platform.isWindows) {
+    applyWindowIcon();
+  }
 
   runApp(KeyFixApp(controller: controller));
 }

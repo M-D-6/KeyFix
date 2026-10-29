@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import '../core/conversion_result.dart';
 import '../core/keyboard_converter.dart';
@@ -40,7 +41,7 @@ class SelectionConverter {
     _running = true;
 
     ClipboardSnapshotHandle? snapshot;
-    bool ourClipboardWasInstalled = false;
+    bool clipboardDirty = false;
 
     try {
       final int target = _os.foregroundWindow();
@@ -66,23 +67,41 @@ class SelectionConverter {
         return ConversionResult.focusChanged;
       }
 
-      final int sequenceBeforeCopy = _os.clipboardSequenceNumber();
+      String? selectedText = _os.readSelectionDirect();
 
-      if (!_stillForeground(target) || !_os.sendCopy()) {
-        return ConversionResult.inputInjectionFailed;
+      if (selectedText == null) {
+        String? sentinel;
+
+        if (_os.needsCopySentinel) {
+          sentinel = '\u200B${DateTime.now().microsecondsSinceEpoch}';
+          clipboardDirty = true;
+          if (!_os.setClipboardText(sentinel)) {
+            return ConversionResult.clipboardError;
+          }
+        }
+
+        final int sequenceBeforeCopy = _os.clipboardSequenceNumber();
+
+        if (!_stillForeground(target) || !_os.sendCopy()) {
+          return ConversionResult.inputInjectionFailed;
+        }
+
+        final _ClipboardWait wait =
+            await _waitForClipboardChange(sequenceBeforeCopy, target, 500);
+
+        if (wait == _ClipboardWait.focusChanged) {
+          return ConversionResult.focusChanged;
+        }
+        if (wait == _ClipboardWait.timedOut) {
+          return ConversionResult.noSelectionFound;
+        }
+
+        selectedText = await _waitForClipboardText(target, 300);
+
+        if (sentinel != null && selectedText == sentinel) {
+          selectedText = null;
+        }
       }
-
-      final _ClipboardWait wait =
-          await _waitForClipboardChange(sequenceBeforeCopy, target, 500);
-
-      if (wait == _ClipboardWait.focusChanged) {
-        return ConversionResult.focusChanged;
-      }
-      if (wait == _ClipboardWait.timedOut) {
-        return ConversionResult.noSelectionFound;
-      }
-
-      final String? selectedText = await _waitForClipboardText(target, 300);
 
       if (selectedText == null || selectedText.isEmpty) {
         return ConversionResult.noSelectionFound;
@@ -102,6 +121,7 @@ class SelectionConverter {
         return ConversionResult.focusChanged;
       }
 
+      clipboardDirty = true;
       final bool clipboardSet =
           await _setClipboardTextWithRetry(converted, target, 250);
 
@@ -109,28 +129,18 @@ class SelectionConverter {
         return ConversionResult.clipboardError;
       }
 
-      ourClipboardWasInstalled = true;
-
       final int sequenceAfterOurSet = _os.clipboardSequenceNumber();
-
-      if (!_stillForeground(target)) {
-        return ConversionResult.focusChanged;
-      }
 
       if (!_stillForeground(target) || !_os.sendPaste()) {
         return ConversionResult.inputInjectionFailed;
       }
 
-      await _delay(80);
+      await _delay(Platform.isWindows ? 80 : 200);
 
       if (_stillForeground(target) &&
-          _os.clipboardSequenceNumber() == sequenceAfterOurSet) {
-        if (snapshot.canRestore) {
-          _os.restoreClipboard(snapshot);
-        }
+          _os.clipboardSequenceNumber() != sequenceAfterOurSet) {
+        clipboardDirty = false;
       }
-
-      ourClipboardWasInstalled = false;
 
       if (autoSwitchKeyboardLanguage && _stillForeground(target)) {
         _setKeyboardLanguageFromLastLetter(target, converted);
@@ -138,15 +148,14 @@ class SelectionConverter {
 
       return ConversionResult.success;
     } catch (_) {
-      if (ourClipboardWasInstalled && snapshot != null && snapshot.canRestore) {
-        try {
-          _os.restoreClipboard(snapshot);
-        } catch (_) {}
-      }
-
       return ConversionResult.clipboardError;
     } finally {
       if (snapshot != null) {
+        if (clipboardDirty && snapshot.canRestore) {
+          try {
+            _os.restoreClipboard(snapshot);
+          } catch (_) {}
+        }
         _os.disposeSnapshot(snapshot);
       }
       _running = false;
@@ -179,7 +188,7 @@ class SelectionConverter {
 
   Future<_ReleaseResult> _waitForHotKeyRelease(int target) async {
     const int timeout = 1200;
-    const int poll = 5;
+    final int poll = _os.pollIntervalMs;
 
     int elapsed = 0;
 
@@ -204,7 +213,7 @@ class SelectionConverter {
     int target,
     int timeoutMs,
   ) async {
-    const int poll = 5;
+    final int poll = _os.pollIntervalMs;
     int elapsed = 0;
 
     while (elapsed < timeoutMs) {
@@ -228,7 +237,7 @@ class SelectionConverter {
   }
 
   Future<String?> _waitForClipboardText(int target, int timeoutMs) async {
-    const int poll = 5;
+    final int poll = _os.pollIntervalMs;
     int elapsed = 0;
 
     while (elapsed < timeoutMs) {
@@ -253,7 +262,7 @@ class SelectionConverter {
     int target,
     int timeoutMs,
   ) async {
-    const int retry = 5;
+    final int retry = _os.pollIntervalMs;
     int elapsed = 0;
 
     while (elapsed < timeoutMs) {

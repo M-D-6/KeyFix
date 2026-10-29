@@ -1,5 +1,5 @@
 name: keyfix
-description: Fix text typed in the wrong keyboard layout with a single shortcut. (Flutter port of M-D-6/KeyFix)
+description: Fix text typed in the wrong keyboard layout with a single shortcut.
 publish_to: 'none'
 version: 1.0.1+1
 

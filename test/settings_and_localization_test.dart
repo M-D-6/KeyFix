@@ -75,8 +75,8 @@ void main() {
     ]));
   });
 
-  test('both language tables have identical keys (75 entries)', () {
-    expect(kEnglishStrings.length, 75);
+  test('both language tables have identical keys (81 entries)', () {
+    expect(kEnglishStrings.length, 81);
     expect(kPersianStrings.keys.toSet(), kEnglishStrings.keys.toSet());
   });
 
